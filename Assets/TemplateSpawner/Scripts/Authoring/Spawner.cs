@@ -1,51 +1,47 @@
-namespace Examples.BulletHell
+namespace TemplateSpawner
 {
     using Unity.Entities;
     using Unity.Mathematics;
     using UnityEngine;
 
-    public class BulletSpawnerAuthoring : MonoBehaviour
+    public class Spawner : MonoBehaviour
     {
         // Add MonoBehaviour Info here to transfer to Entity World
-        public GameObject BulletPrefab;
+        public GameObject SpawnPrefab;
         public float SpawnRate;
 
         [Header("Optional")]
         [Tooltip("Custom Spawn Position & Rotation")]
         public Transform SpawnTransform;
 
-        class Baker : Baker<BulletSpawnerAuthoring>
+        class Baker : Baker<Spawner>
         {
-            public override void Bake(BulletSpawnerAuthoring authoring)
+            public override void Bake(Spawner authoring)
             {
                 // Transform the GameObject into Entity with transform data
                 var baseEntity = GetEntity(TransformUsageFlags.Dynamic);
 
                 // Add additional Components
-                authoring.transform.GetPositionAndRotation(out var spawnPos, out var spawnRot);
+                var spawnPos = authoring.transform.position;
                 if (authoring.SpawnTransform != null)
                 {
                     spawnPos = authoring.SpawnTransform.position;
-                    spawnRot = authoring.SpawnTransform.rotation;
                 }
-                var data = new BulletSpawnerData()
+                var data = new SpawnerData()
                 {
-                    EntityBulletPrefab = GetEntity(authoring.BulletPrefab, TransformUsageFlags.Dynamic),
+                    EntitySpawnPrefab = GetEntity(authoring.SpawnPrefab, TransformUsageFlags.Dynamic),
                     SpawnPosition = spawnPos,
-                    SpawnRotation = spawnRot,
                     SpawnRate = authoring.SpawnRate,
                 };
-
                 AddComponent(baseEntity, data);
             }
         }
     }
 
-    public struct BulletSpawnerData : IComponentData
+    public struct SpawnerData : IComponentData
     {
-        public Entity EntityBulletPrefab;
+        public Entity EntitySpawnPrefab;
         public float3 SpawnPosition;
-        public quaternion SpawnRotation;
         public float SpawnRate;
 
         public float NextSpawnTime;
