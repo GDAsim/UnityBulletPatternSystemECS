@@ -30,7 +30,7 @@ public partial struct ShootSystem : ISystem
     {
         localTransformLU.Update(ref state);
 
-        new BulletSpawnerJob
+        new ShootJob
         {
             DeltaTime = SystemAPI.Time.DeltaTime,
 
@@ -42,7 +42,7 @@ public partial struct ShootSystem : ISystem
 }
 
 [BurstCompile]
-public partial struct BulletSpawnerJob : IJobEntity
+public partial struct ShootJob : IJobEntity
 {
     public float DeltaTime;
 
@@ -50,7 +50,7 @@ public partial struct BulletSpawnerJob : IJobEntity
 
     public ComponentLookup<LocalTransform> localTransformLU;
 
-    void Execute([ChunkIndexInQuery] int chunkIndex, ref ShootData data)
+    void Execute(ref ShootData data)
     {
         bool HaveAmmo = data.CurrentAmmoCount > 0;
         bool HaveMag = data.CurrentMagazineCount > 0;

@@ -8,11 +8,13 @@ public class BulletPatternSystemAuthoring : MonoBehaviour
         public override void Bake(BulletPatternSystemAuthoring authoring)
         {
             var shootSystemHandle = World.DefaultGameObjectInjectionWorld.CreateSystem<ShootSystem>();
+            var ammoSystemHandle = World.DefaultGameObjectInjectionWorld.CreateSystem<AmmoSystem>();
 
             var SimSG = World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<SimulationSystemGroup>();
 
             // ===========================  SimulationSystemGroup       ===========================
             SimSG.AddSystemToUpdateList(shootSystemHandle);
+            SimSG.AddSystemToUpdateList(ammoSystemHandle);
         }
     }
 }

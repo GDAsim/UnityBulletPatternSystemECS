@@ -143,7 +143,22 @@ public class Ammo : MonoBehaviour
 
             var baseEntity = GetEntity(TransformUsageFlags.Dynamic);
 
-            //AddComponent(baseEntity, shootData);
+            var data = new AmmoData();
+
+            AddComponentObject(baseEntity, data);
         }
     }
+}
+
+public class AmmoData : IComponentData
+{
+    public IAction[] Patterns;
+    public int CurrentIndex;
+
+    public ActionTypes CurrentActionType;
+    public TransformAction CurrentTransformAction;
+    public DelayAction CurrentDelayAction;
+    public SplitAction CurrentSplitAction;
+
+    public float CurrentActionTimer;
 }
