@@ -1,11 +1,12 @@
-using TemplateSpawner;
 using Unity.Entities;
-using Unity.Mathematics;
 using UnityEngine;
 
 public class Shoot : MonoBehaviour
 {
     [SerializeField] Ammo AmmoPrefab;
+
+    [Header("Optional")]
+    [SerializeField] Transform CustomFirePos;
 
     [Header("Shoot Properties")]
     [SerializeField] ShootStats stats;
@@ -139,52 +140,58 @@ public class Shoot : MonoBehaviour
         currentAmmoCount = stats.MagazineCapacity;
     }
 
-    class Baker : Baker<Spawner>
+    class Baker : Baker<Shoot>
     {
-        public override void Bake(Spawner authoring)
+        public override void Bake(Shoot authoring)
         {
+            DependsOn(authoring.stats);
+
             var baseEntity = GetEntity(TransformUsageFlags.Dynamic);
 
-            // Add additional Components
-            var spawnPos = authoring.transform.position;
-            if (authoring.SpawnTransform != null)
+            var shootData = ShootData.ConvertStats(authoring.stats);
+            shootData.AmmoPrefab = GetEntity(authoring.AmmoPrefab, TransformUsageFlags.Dynamic);
+            if (authoring.CustomFirePos != null)
             {
-                spawnPos = authoring.SpawnTransform.position;
+                shootData.SpawnTransformEntity = GetEntity(authoring.CustomFirePos, TransformUsageFlags.Dynamic);
             }
-            var data = new SpawnerData()
+            else
             {
-                EntitySpawnPrefab = GetEntity(authoring.SpawnPrefab, TransformUsageFlags.Dynamic),
-                SpawnPosition = spawnPos,
-                SpawnRate = authoring.SpawnRate,
-            };
-            AddComponent(baseEntity, data);
+                shootData.SpawnTransformEntity = baseEntity;
+            }
+
+            AddComponent(baseEntity, shootData);
         }
     }
 }
 
-public struct ShootComponentData : IComponentData
+public struct ShootData : IComponentData
 {
-    public Entity EntityBulletPrefab;
-    public float3 SpawnPosition;
-    public quaternion SpawnRotation;
-    public float SpawnRate;
-
-    public float NextSpawnTime;
-
+    public Entity AmmoPrefab;
+    public Entity SpawnTransformEntity;
 
     public int MagazineCount; // How many times can this weapon reload
     public int MagazineCapacity; // How many Ammo per reload 
     public float ReloadDelay; // How long the reload takes
     public float ShootDelay; // How long the shooting takes
 
-    public static ShootComponentData Convert(ShootStats stats)
+    public int CurrentMagazineCount;
+    public int CurrentAmmoCount;
+    public float ShootTimer;
+    public float ReloadTimer;
+
+    public static ShootData ConvertStats(ShootStats stats)
     {
-        return new ShootComponentData()
+        return new ShootData()
         {
             MagazineCount = stats.MagazineCount,
             MagazineCapacity = stats.MagazineCapacity,
             ReloadDelay = stats.ReloadDelay,
             ShootDelay = stats.ShootDelay,
+
+            CurrentMagazineCount = stats.MagazineCount,
+            CurrentAmmoCount = stats.MagazineCapacity,
+            ShootTimer = 0, // -StartShootDelay;
+            ReloadTimer = 0
         };
     }
 }

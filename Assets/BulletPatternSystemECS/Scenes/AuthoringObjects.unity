@@ -362,8 +362,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   AmmoPrefab: {fileID: 8295264336154564726, guid: 8b9741c44b50ec4428fcc644ccca6246, type: 3}
+  CustomFirePos: {fileID: 0}
   stats: {fileID: 11400000, guid: 4c6f4159d51219d4f8e1f6f268063940, type: 2}
-  ShootPower: 2
+  ShootPower: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

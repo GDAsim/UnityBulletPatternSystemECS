@@ -130,7 +130,7 @@ GameObject:
   - component: {fileID: 187187502}
   - component: {fileID: 187187503}
   m_Layer: 0
-  m_Name: BulletHellAuthoring
+  m_Name: BulletPatternSystemAuthoring
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
