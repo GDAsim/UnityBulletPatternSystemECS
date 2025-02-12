@@ -8,15 +8,14 @@ public partial struct ShootSystem : ISystem
 {
     ComponentLookup<LocalTransform> localTransformLU;
 
-    [BurstCompile]  public void OnCreate(ref SystemState state) 
+    [BurstCompile] public void OnCreate(ref SystemState state) 
     {
         localTransformLU = state.GetComponentLookup<LocalTransform>(false);
     }
 
     public void OnDestroy(ref SystemState state) { }
 
-    [BurstCompile]
-    public void OnUpdate(ref SystemState state)
+    [BurstCompile] public void OnUpdate(ref SystemState state)
     {
         var ecbSingleton = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
 

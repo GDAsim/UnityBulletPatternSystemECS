@@ -1,3 +1,4 @@
+using Unity.Entities;
 using UnityEngine;
 
 public class Ammo : MonoBehaviour
@@ -131,6 +132,18 @@ public class Ammo : MonoBehaviour
         if (other.gameObject.CompareTag("Player"))
         {
             Destroy(gameObject);
+        }
+    }
+
+    class Baker : Baker<Ammo>
+    {
+        public override void Bake(Ammo authoring)
+        {
+            //DependsOn(authoring.stats);
+
+            var baseEntity = GetEntity(TransformUsageFlags.Dynamic);
+
+            //AddComponent(baseEntity, shootData);
         }
     }
 }
