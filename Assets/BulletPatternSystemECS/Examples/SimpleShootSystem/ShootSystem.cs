@@ -12,7 +12,6 @@ public partial struct ShootSystem : ISystem
     {
         localTransformLU = state.GetComponentLookup<LocalTransform>(false);
     }
-
     public void OnDestroy(ref SystemState state) { }
 
     [BurstCompile] public void OnUpdate(ref SystemState state)
@@ -41,7 +40,6 @@ public partial struct ShootSystem : ISystem
     }
 }
 
-[BurstCompile]
 public partial struct ShootJob : IJobEntity
 {
     public float DeltaTime;
@@ -50,10 +48,10 @@ public partial struct ShootJob : IJobEntity
 
     public ComponentLookup<LocalTransform> localTransformLU;
 
-    void Execute(ref ShootData data)
+    void Execute(ref ShootData shootData)
     {
-        bool HaveAmmo = data.CurrentAmmoCount > 0;
-        bool HaveMag = data.CurrentMagazineCount > 0;
+        bool HaveAmmo = shootData.CurrentAmmoCount > 0;
+        bool HaveMag = shootData.CurrentMagazineCount > 0;
 
         // Update()
         {
@@ -61,25 +59,33 @@ public partial struct ShootJob : IJobEntity
             {
                 // AttemptShoot()
                 {
-                    data.ShootTimer += DeltaTime;
+                    shootData.ShootTimer += DeltaTime;
 
-                    if (data.ShootTimer >= data.ShootDelay)
+                    if (shootData.ShootTimer >= shootData.ShootDelay)
                     {
-                        data.ShootTimer = 0;
+                        shootData.ShootTimer = 0;
 
                         // Fire()
                         {
-                            Entity newBulletEntity = Ecb.Instantiate(data.AmmoPrefab);
+                            Entity ammoEntity = Ecb.Instantiate(shootData.AmmoPrefab);
 
-                            var spawnTransform = localTransformLU.GetRefRO(data.SpawnTransformEntity).ValueRO;
-                            var bulletTransform = localTransformLU.GetRefRW(data.AmmoPrefab).ValueRW;
+                            var spawnTransform = localTransformLU.GetRefRO(shootData.SpawnTransformEntity).ValueRO;
+                            var bulletTransform = localTransformLU.GetRefRW(shootData.AmmoPrefab).ValueRW;
 
-                            Ecb.SetComponent(newBulletEntity, LocalTransform.FromPositionRotationScale(spawnTransform.Position, spawnTransform.Rotation, bulletTransform.Scale));
+                            Ecb.SetComponent(ammoEntity, LocalTransform.FromPositionRotationScale(spawnTransform.Position, spawnTransform.Rotation, bulletTransform.Scale));
 
-                            //Ecb.addc
-                            //ammo.Setup(bulletPattern);
+                            AmmoData ammoData = new()
+                            {
+                                Patterns = BulletPatterns.Straight(2),
 
-                            data.CurrentAmmoCount--;
+                                CurrentIndex = 0,
+                                CurrentActionTimer = 0
+                            };
+
+                            Ecb.AddComponent(ammoEntity, ammoData);
+                            Ecb.AddComponent(ammoEntity, new AmmoInit());
+
+                            shootData.CurrentAmmoCount--;
                         }
                     }
                 }
@@ -90,16 +96,16 @@ public partial struct ShootJob : IJobEntity
                 {
                     // AttemptReload()
                     {
-                        data.ReloadTimer += DeltaTime;
+                        shootData.ReloadTimer += DeltaTime;
 
-                        if (data.ReloadTimer >= data.ReloadDelay)
+                        if (shootData.ReloadTimer >= shootData.ReloadDelay)
                         {
-                            data.ReloadTimer -= data.ReloadDelay;
+                            shootData.ReloadTimer -= shootData.ReloadDelay;
 
                             // Reload()
                             {
-                                data.CurrentMagazineCount--;
-                                data.CurrentAmmoCount = data.MagazineCapacity;
+                                shootData.CurrentMagazineCount--;
+                                shootData.CurrentAmmoCount = shootData.MagazineCapacity;
                             }
                         }
                     }

@@ -9,12 +9,14 @@ public class BulletPatternSystemAuthoring : MonoBehaviour
         {
             var shootSystemHandle = World.DefaultGameObjectInjectionWorld.CreateSystem<ShootSystem>();
             var ammoSystemHandle = World.DefaultGameObjectInjectionWorld.CreateSystem<AmmoSystem>();
+            var ammoinitSystemHandle = World.DefaultGameObjectInjectionWorld.CreateSystem<AmmoInitSystem>();
 
             var SimSG = World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<SimulationSystemGroup>();
 
             // ===========================  SimulationSystemGroup       ===========================
             SimSG.AddSystemToUpdateList(shootSystemHandle);
             SimSG.AddSystemToUpdateList(ammoSystemHandle);
+            SimSG.AddSystemToUpdateList(ammoinitSystemHandle);
         }
     }
 }

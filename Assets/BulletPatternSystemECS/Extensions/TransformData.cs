@@ -1,4 +1,6 @@
 using System;
+using Unity.Mathematics;
+using Unity.Transforms;
 using UnityEngine;
 
 public struct TransformData
@@ -25,6 +27,36 @@ public struct TransformData
         transform.localRotation = Rotation * transform.localRotation;
         transform.localScale += Scale;
     }
+
+    public TransformData(LocalTransform transform)
+    {
+        Position = transform.Position;
+        Rotation = transform.Rotation;
+        Scale = Vector3.one * transform.Scale;
+    }
+
+    public void ApplyTo(ref LocalTransform transform)
+    {
+        transform.Position = Position;
+        transform.Rotation = Rotation;
+        transform.Scale = Scale.x;
+    }
+    public void AddTo(ref LocalTransform transform)
+    {
+        transform.Position += (float3)Position;
+        transform.Rotation = Rotation * transform.Rotation;
+        transform.Scale += Scale.x;
+    }
+
+
+
+
+
+
+
+
+
+
 
     public static TransformData operator -(TransformData left, TransformData right)
     {

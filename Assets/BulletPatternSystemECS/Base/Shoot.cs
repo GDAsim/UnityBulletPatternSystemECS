@@ -41,7 +41,7 @@ public class Shoot : MonoBehaviour
         this.systemPattern = systemPattern;
 
         currentAction = systemPattern[currentIndex++];
-        currentAction.ReadyAction(transform);
+        //currentAction.ReadyAction(transform);
         actionTimer = -StartSystemDelay;
         if (currentIndex == systemPattern.Length) currentIndex = 0;
     }
@@ -90,7 +90,7 @@ public class Shoot : MonoBehaviour
             currentAction.EndAction();
 
             currentAction = systemPattern[currentIndex++];
-            currentAction.ReadyAction(transform);
+            //currentAction.ReadyAction(transform);
             actionTimer = 0;
             if (currentIndex == systemPattern.Length) currentIndex = 0;
         }

@@ -1,5 +1,5 @@
 using System;
-using UnityEngine;
+using Unity.Transforms;
 
 public partial struct TransformAction : IAction
 {
@@ -10,7 +10,7 @@ public partial struct TransformAction : IAction
     /// </summary>
     public bool IsDeltaAction;
 
-    Transform transform;
+    LocalTransform transform;
     TransformData startData;
     TransformData prevData;
     float timer;
@@ -28,12 +28,9 @@ public partial struct TransformAction : IAction
     /// <summary>
     /// Prep Function - Call Once Before Update
     /// </summary>
-    public void ReadyAction(Transform transform)
+    public void ReadyAction(ref LocalTransform transform)
     {
         this.transform = transform;
-
-        transform.GetLocalPositionAndRotation(out var pos, out var rot);
-        var scale = transform.localScale;
 
         startData = new(transform);
 
@@ -55,11 +52,30 @@ public partial struct TransformAction : IAction
         if (IsDeltaAction)
         {
             var delta = transformData - prevData;
-            delta.AddTo(transform);
+            delta.AddTo(ref transform);
         }
         else
         {
-            transformData.ApplyTo(transform);
+            transformData.ApplyTo(ref transform);
+        }
+
+        prevData = transformData;
+    }
+
+    public void DoAction2(float deltatime, ref LocalTransform localTransform)
+    {
+        timer += deltatime;
+
+        var transformData = Action.Invoke(startData, ActionSpeed, timer);
+
+        if (IsDeltaAction)
+        {
+            var delta = transformData - prevData;
+            delta.AddTo(ref localTransform);
+        }
+        else
+        {
+            transformData.ApplyTo(ref localTransform);
         }
 
         prevData = transformData;
@@ -74,11 +90,11 @@ public partial struct TransformAction : IAction
         if (IsDeltaAction)
         {
             var delta = transformData - prevData;
-            delta.AddTo(transform);
+            delta.AddTo(ref transform);
         }
         else
         {
-            transformData.ApplyTo(transform);
+            transformData.ApplyTo(ref transform);
         }
     }
 }

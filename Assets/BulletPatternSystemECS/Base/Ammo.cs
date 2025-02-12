@@ -84,7 +84,7 @@ public class Ammo : MonoBehaviour
         switch (currentActionType)
         {
             case ActionTypes.TransformAction:
-                currentTransformAction.ReadyAction(transform);
+                //currentTransformAction.ReadyAction(transform);
                 return;
             case ActionTypes.DelayAction:
                 currentDelayAction.ReadyAction();
@@ -134,20 +134,6 @@ public class Ammo : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
-    class Baker : Baker<Ammo>
-    {
-        public override void Bake(Ammo authoring)
-        {
-            //DependsOn(authoring.stats);
-
-            var baseEntity = GetEntity(TransformUsageFlags.Dynamic);
-
-            var data = new AmmoData();
-
-            AddComponentObject(baseEntity, data);
-        }
-    }
 }
 
 public class AmmoData : IComponentData
@@ -162,3 +148,4 @@ public class AmmoData : IComponentData
 
     public float CurrentActionTimer;
 }
+public struct AmmoInit : IComponentData { }
