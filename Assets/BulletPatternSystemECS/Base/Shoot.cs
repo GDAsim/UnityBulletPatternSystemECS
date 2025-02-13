@@ -1,4 +1,6 @@
 using Unity.Entities;
+using Unity.Transforms;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 public class Shoot : MonoBehaviour
@@ -12,118 +14,24 @@ public class Shoot : MonoBehaviour
     [SerializeField] ShootStats stats;
     [SerializeField] float ShootPower = 2;
 
-    int currentMagazineCount;
-    int currentAmmoCount;
-    float shootTimer;
-    float reloadTimer;
-    bool HaveAmmo => currentAmmoCount > 0;
-    bool HaveMag => currentMagazineCount > 0;
-    public int TotalShootCount { get; set; }
+    //void Start()
+    //{
+    //    var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
-    TransformAction[] systemPattern;
-    int currentIndex = 0;
+    //    var thisEntity = entityManager.CreateEntity();
+    //    entityManager.SetName(thisEntity, name);
 
-    TransformAction currentAction;
-    float actionTimer = 0;
+    //    // Add basic Components
+    //    entityManager.AddComponent<LocalTransform>(thisEntity);
 
-    IAction[] bulletPattern;
-    Transform firetransform;
+    //    var shootData = new ShootData();
+    //    shootData.SetStats(stats, 0);
+    //    entityManager.AddComponentObject(thisEntity, shootData);
 
-    public void SetupShoot(IAction[] bulletPattern, ShootStats shootStats,
-        float StartShootDelay = 0)
-    {
-        this.bulletPattern = bulletPattern;
-        this.stats = shootStats;
-
-        firetransform = transform;
-
-        currentMagazineCount = stats.MagazineCount;
-        currentAmmoCount = stats.MagazineCapacity;
-        shootTimer = -StartShootDelay;
-        reloadTimer = 0;
-    }
-    void Update()
-    {
-        PreShootAction();
-
-        if (HaveAmmo)
-        {
-            AttemptShoot();
-        }
-        else
-        {
-            if (HaveMag)
-            {
-                AttemptReload();
-            }
-        }
-    }
-
-    void PreShootAction()
-    {
-        if (systemPattern == null || systemPattern.Length == 0)
-        {
-            //Debug.LogWarning("No System Pattern Set", this);
-            return;
-        }
-
-        var dt = Time.deltaTime;
-
-        if (actionTimer >= currentAction.Duration && currentAmmoCount > 0)
-        {
-            currentAction.EndAction();
-
-            currentAction = systemPattern[currentIndex++];
-            //currentAction.ReadyAction(transform);
-            actionTimer = 0;
-            if (currentIndex == systemPattern.Length) currentIndex = 0;
-        }
-
-        currentAction.DoAction(dt);
-        actionTimer += dt;
-    }
-
-    void AttemptShoot()
-    {
-        shootTimer += Time.deltaTime;
-
-        if (shootTimer >= stats.ShootDelay)
-        {
-            shootTimer = 0;
-
-            Fire();
-        }
-    }
-    void Fire()
-    {
-        firetransform.GetPositionAndRotation(out Vector3 pos, out Quaternion rot);
-
-        var ammo = Instantiate(AmmoPrefab, pos, rot);
-
-        ammo.Setup(bulletPattern);
-
-        currentAmmoCount--;
-
-        TotalShootCount++;
-    }
-
-    void AttemptReload()
-    {
-        reloadTimer += Time.deltaTime;
-
-        if (reloadTimer >= stats.ReloadDelay)
-        {
-            reloadTimer -= stats.ReloadDelay;
-
-            Reload();
-        }
-    }
-    void Reload()
-    {
-        currentMagazineCount--;
-        currentAmmoCount = stats.MagazineCapacity;
-    }
-
+    //    var shootData2 = new ShootData2();
+    //    shootData2.Patterns = BulletPatterns.Straight(2);
+    //    entityManager.AddComponentObject(thisEntity, shootData2);
+    //}
     class Baker : Baker<Shoot>
     {
         public override void Bake(Shoot authoring)
@@ -143,13 +51,44 @@ public class Shoot : MonoBehaviour
                 shootData.SpawnTransform = baseEntity;
             }
 
-            //shootData.BulletPattern = BulletPatterns.Straight(2);
+            ////HELP DOESNT WORK
+            //shootData.Patterns = BulletPatterns.Straight(2);
 
             shootData.SetStats(authoring.stats, 0);
 
             AddComponentObject(baseEntity, shootData);
+
+            //var shootData2 = new ShootData2();
+            //shootData2.Patterns = Straight(2);
+            //AddComponentObject(baseEntity, shootData2);
+        }
+
+        public IAction[] Straight(float actionSpeed) => new IAction[1]
+        {
+            new TransformAction
+            {
+                Duration = 1111111,
+                StartTime = 0,
+
+                Action = MoveForward,
+                ActionSpeed = actionSpeed,
+                IsDeltaAction = true,
+            }
+        };
+
+        public static TransformData MoveForward(TransformData startData, float speed, float time)
+        {
+            var forward = startData.Rotation * Vector3.forward * (speed * time);
+
+            startData.Position = startData.Position + forward;
+
+            return startData;
         }
     }
+}
+public class ShootData2 : IComponentData
+{
+    public IAction[] Patterns;
 }
 
 public class ShootData : IComponentData
@@ -157,7 +96,7 @@ public class ShootData : IComponentData
     public Entity AmmoPrefab;
     public Entity SpawnTransform;
 
-    //public IAction[] BulletPattern;
+    public IAction[] Patterns;
 
     public int MagazineCount; // How many times can this weapon reload
     public int MagazineCapacity; // How many Ammo per reload 

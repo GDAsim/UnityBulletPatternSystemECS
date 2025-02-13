@@ -22,10 +22,9 @@ public partial class ShootSystem : SystemBase
 
         var ecb = new EntityCommandBuffer(Allocator.TempJob);
 
-        localTransformLU.Update(this);
+        //localTransformLU.Update(this);
 
-
-        DoJobs(ref ecb, ref localTransformLU);
+        //DoJobs(ref ecb, ref localTransformLU);
 
         Dependency.Complete();
         ecb.Playback(EntityManager);
@@ -83,7 +82,8 @@ public partial struct ShootJob : IJobEntity
 
                             AmmoData ammoData = new()
                             {
-                                Patterns = BulletPatterns.Straight(2),
+                                //Patterns = BulletPatterns.Straight(2),
+                                Patterns = shootData.Patterns,
 
                                 CurrentIndex = 0,
                                 CurrentActionTimer = 0
