@@ -29,22 +29,6 @@ public class Shoot : MonoBehaviour
     IAction[] bulletPattern;
     Transform firetransform;
 
-    void Awake()
-    {
-        var bulletPattern = BulletPatterns.Straight(ShootPower);
-        SetupShoot(bulletPattern, stats);
-    }
-
-    public void SetupPreShoot(TransformAction[] systemPattern,
-        float StartSystemDelay = 0)
-    {
-        this.systemPattern = systemPattern;
-
-        currentAction = systemPattern[currentIndex++];
-        //currentAction.ReadyAction(transform);
-        actionTimer = -StartSystemDelay;
-        if (currentIndex == systemPattern.Length) currentIndex = 0;
-    }
     public void SetupShoot(IAction[] bulletPattern, ShootStats shootStats,
         float StartShootDelay = 0)
     {
@@ -148,26 +132,32 @@ public class Shoot : MonoBehaviour
 
             var baseEntity = GetEntity(TransformUsageFlags.Dynamic);
 
-            var shootData = ShootData.ConvertStats(authoring.stats);
+            var shootData = new ShootData();
             shootData.AmmoPrefab = GetEntity(authoring.AmmoPrefab, TransformUsageFlags.Dynamic);
             if (authoring.CustomFirePos != null)
             {
-                shootData.SpawnTransformEntity = GetEntity(authoring.CustomFirePos, TransformUsageFlags.Dynamic);
+                shootData.SpawnTransform = GetEntity(authoring.CustomFirePos, TransformUsageFlags.Dynamic);
             }
             else
             {
-                shootData.SpawnTransformEntity = baseEntity;
+                shootData.SpawnTransform = baseEntity;
             }
 
-            AddComponent(baseEntity, shootData);
+            //shootData.BulletPattern = BulletPatterns.Straight(2);
+
+            shootData.SetStats(authoring.stats, 0);
+
+            AddComponentObject(baseEntity, shootData);
         }
     }
 }
 
-public struct ShootData : IComponentData
+public class ShootData : IComponentData
 {
     public Entity AmmoPrefab;
-    public Entity SpawnTransformEntity;
+    public Entity SpawnTransform;
+
+    //public IAction[] BulletPattern;
 
     public int MagazineCount; // How many times can this weapon reload
     public int MagazineCapacity; // How many Ammo per reload 
@@ -179,19 +169,16 @@ public struct ShootData : IComponentData
     public float ShootTimer;
     public float ReloadTimer;
 
-    public static ShootData ConvertStats(ShootStats stats)
+    public void SetStats(ShootStats stats, float StartShootDelay)
     {
-        return new ShootData()
-        {
-            MagazineCount = stats.MagazineCount,
-            MagazineCapacity = stats.MagazineCapacity,
-            ReloadDelay = stats.ReloadDelay,
-            ShootDelay = stats.ShootDelay,
+        MagazineCount = stats.MagazineCount;
+        MagazineCapacity = stats.MagazineCapacity;
+        ReloadDelay = stats.ReloadDelay;
+        ShootDelay = stats.ShootDelay;
 
-            CurrentMagazineCount = stats.MagazineCount,
-            CurrentAmmoCount = stats.MagazineCapacity,
-            ShootTimer = 0, // -StartShootDelay;
-            ReloadTimer = 0
-        };
+        CurrentMagazineCount = stats.MagazineCount;
+        CurrentAmmoCount = stats.MagazineCapacity;
+        ShootTimer = -StartShootDelay;
+        ReloadTimer = 0;
     }
 }

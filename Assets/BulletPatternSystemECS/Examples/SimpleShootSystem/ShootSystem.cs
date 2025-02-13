@@ -1,34 +1,41 @@
-using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
+using Unity.Jobs;
 using Unity.Transforms;
 
-[BurstCompile]
 [DisableAutoCreation]
-public partial struct ShootSystem : ISystem
+public partial class ShootSystem : SystemBase
 {
     ComponentLookup<LocalTransform> localTransformLU;
 
-    [BurstCompile] public void OnCreate(ref SystemState state) 
+    protected override void OnCreate() 
     {
-        localTransformLU = state.GetComponentLookup<LocalTransform>(false);
+        localTransformLU = GetComponentLookup<LocalTransform>(false);
     }
-    public void OnDestroy(ref SystemState state) { }
-
-    [BurstCompile] public void OnUpdate(ref SystemState state)
+    protected override void OnDestroy() { }
+    protected override void OnUpdate()
     {
-        var ecbSingleton = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
+        //CompleteDependency();
 
-        EntityCommandBuffer ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
+        //var ecbSingleton = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
+        //EntityCommandBuffer ecb = ecbSingleton.CreateCommandBuffer(EntityManager.WorldUnmanaged);
 
-        DoJobs(ref state, ref ecb, ref localTransformLU);
+        var ecb = new EntityCommandBuffer(Allocator.TempJob);
+
+        localTransformLU.Update(this);
+
+
+        DoJobs(ref ecb, ref localTransformLU);
+
+        Dependency.Complete();
+        ecb.Playback(EntityManager);
+        ecb.Dispose();
     }
 
-    void DoJobs(ref SystemState state,
+    void DoJobs(
         ref EntityCommandBuffer ecb,
         ref ComponentLookup<LocalTransform> localTransformLU)
     {
-        localTransformLU.Update(ref state);
-
         new ShootJob
         {
             DeltaTime = SystemAPI.Time.DeltaTime,
@@ -48,7 +55,7 @@ public partial struct ShootJob : IJobEntity
 
     public ComponentLookup<LocalTransform> localTransformLU;
 
-    void Execute(ref ShootData shootData)
+    void Execute(ShootData shootData)
     {
         bool HaveAmmo = shootData.CurrentAmmoCount > 0;
         bool HaveMag = shootData.CurrentMagazineCount > 0;
@@ -69,7 +76,7 @@ public partial struct ShootJob : IJobEntity
                         {
                             Entity ammoEntity = Ecb.Instantiate(shootData.AmmoPrefab);
 
-                            var spawnTransform = localTransformLU.GetRefRO(shootData.SpawnTransformEntity).ValueRO;
+                            var spawnTransform = localTransformLU.GetRefRO(shootData.SpawnTransform).ValueRO;
                             var bulletTransform = localTransformLU.GetRefRW(shootData.AmmoPrefab).ValueRW;
 
                             Ecb.SetComponent(ammoEntity, LocalTransform.FromPositionRotationScale(spawnTransform.Position, spawnTransform.Rotation, bulletTransform.Scale));
