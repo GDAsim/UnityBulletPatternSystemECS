@@ -14,24 +14,15 @@ public class Shoot : MonoBehaviour
     [SerializeField] ShootStats stats;
     [SerializeField] float ShootPower = 2;
 
-    //void Start()
-    //{
-    //    var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+    public Entity thisEntity;
 
-    //    var thisEntity = entityManager.CreateEntity();
-    //    entityManager.SetName(thisEntity, name);
+    void Start()
+    {
+        var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
-    //    // Add basic Components
-    //    entityManager.AddComponent<LocalTransform>(thisEntity);
+        entityManager.SetName(thisEntity, "HAHA123");
 
-    //    var shootData = new ShootData();
-    //    shootData.SetStats(stats, 0);
-    //    entityManager.AddComponentObject(thisEntity, shootData);
-
-    //    var shootData2 = new ShootData2();
-    //    shootData2.Patterns = BulletPatterns.Straight(2);
-    //    entityManager.AddComponentObject(thisEntity, shootData2);
-    //}
+    }
     class Baker : Baker<Shoot>
     {
         public override void Bake(Shoot authoring)
@@ -40,49 +31,11 @@ public class Shoot : MonoBehaviour
 
             var baseEntity = GetEntity(TransformUsageFlags.Dynamic);
 
-            var shootData = new ShootData();
-            shootData.AmmoPrefab = GetEntity(authoring.AmmoPrefab, TransformUsageFlags.Dynamic);
-            if (authoring.CustomFirePos != null)
-            {
-                shootData.SpawnTransform = GetEntity(authoring.CustomFirePos, TransformUsageFlags.Dynamic);
-            }
-            else
-            {
-                shootData.SpawnTransform = baseEntity;
-            }
-
-            ////HELP DOESNT WORK
-            //shootData.Patterns = BulletPatterns.Straight(2);
-
-            shootData.SetStats(authoring.stats, 0);
-
-            AddComponentObject(baseEntity, shootData);
-
             //var shootData2 = new ShootData2();
-            //shootData2.Patterns = Straight(2);
-            //AddComponentObject(baseEntity, shootData2);
-        }
+            //shootData2.Patterns = BulletPatterns.Straight(2);
+            //AddComponentObject<(baseEntity, shootData2);
 
-        public IAction[] Straight(float actionSpeed) => new IAction[1]
-        {
-            new TransformAction
-            {
-                Duration = 1111111,
-                StartTime = 0,
-
-                Action = MoveForward,
-                ActionSpeed = actionSpeed,
-                IsDeltaAction = true,
-            }
-        };
-
-        public static TransformData MoveForward(TransformData startData, float speed, float time)
-        {
-            var forward = startData.Rotation * Vector3.forward * (speed * time);
-
-            startData.Position = startData.Position + forward;
-
-            return startData;
+            authoring.thisEntity = baseEntity;
         }
     }
 }
