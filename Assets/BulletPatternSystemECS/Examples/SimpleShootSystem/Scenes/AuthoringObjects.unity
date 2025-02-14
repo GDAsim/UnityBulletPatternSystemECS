@@ -323,13 +323,28 @@ GameObject:
   - component: {fileID: 303466766594251669}
   - component: {fileID: 342544080589571153}
   - component: {fileID: 3323316680233894852}
+  - component: {fileID: 5067033990588423961}
   m_Layer: 0
-  m_Name: SimpleShoot
+  m_Name: SimpleGun
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &5067033990588423961
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5067033990588423960}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3575c174ed4f120468f04b4149e361d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseStats: {fileID: 11400000, guid: 4c6f4159d51219d4f8e1f6f268063940, type: 2}
+  gun: {fileID: 8882409633550944975}
 --- !u!1 &6077420205784155915
 GameObject:
   m_ObjectHideFlags: 0
@@ -363,8 +378,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AmmoPrefab: {fileID: 8295264336154564726, guid: 8b9741c44b50ec4428fcc644ccca6246, type: 3}
   CustomFirePos: {fileID: 0}
-  stats: {fileID: 11400000, guid: 4c6f4159d51219d4f8e1f6f268063940, type: 2}
-  ShootPower: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

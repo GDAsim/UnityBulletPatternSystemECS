@@ -1,5 +1,7 @@
+using System;
 using Unity.Entities;
 using UnityEngine;
+using static GunData;
 
 public class Ammo : MonoBehaviour
 {
@@ -99,7 +101,7 @@ public class Ammo : MonoBehaviour
         switch (currentActionType)
         {
             case ActionTypes.TransformAction:
-                currentTransformAction.DoAction(Time.deltaTime);
+                //currentTransformAction.DoAction(Time.deltaTime);
                 return currentActionTimer >= currentTransformAction.Duration;
             case ActionTypes.DelayAction:
                 currentDelayAction.DoAction();
@@ -116,13 +118,13 @@ public class Ammo : MonoBehaviour
         switch (currentActionType)
         {
             case ActionTypes.TransformAction:
-                currentTransformAction.EndAction();
+                //currentTransformAction.EndAction();
                 return;
             case ActionTypes.DelayAction:
-                currentDelayAction.EndAction();
+                //currentDelayAction.EndAction();
                 return;
             case ActionTypes.SplitAction:
-                currentSplitAction.EndAction();
+                //currentSplitAction.EndAction();
                 return;
         }
     }
@@ -134,6 +136,11 @@ public class Ammo : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
+
+
+
+    
 }
 
 public class AmmoData : IComponentData
@@ -147,5 +154,53 @@ public class AmmoData : IComponentData
     public SplitAction CurrentSplitAction;
 
     public float CurrentActionTimer;
+
+    public static IAction[] GetPattern(GunPatternSelect select, float power)
+    {
+        switch (select)
+        {
+            case GunPatternSelect.One:
+                return BulletPatterns.Straight(power);
+            case GunPatternSelect.Two:
+                return BulletPatterns.Sine(power, Vector3.left, 1f);
+            case GunPatternSelect.Three:
+                var pattern = new IAction[]
+                {
+                    new TransformAction
+                    {
+                        Duration = MathF.PI * 2,
+                        StartTime = 0,
+
+                        Action = SineMove,
+                        ActionSpeed = power,
+                        IsDeltaAction = true
+                    },
+                    new TransformAction
+                    {
+                        Duration = 1,
+                        StartTime = 0,
+
+                        Action = TransformAction.MoveForward,
+                        ActionSpeed = power,
+                        IsDeltaAction = true,
+                    }
+                };
+                return pattern;
+            case GunPatternSelect.Four:
+                return BulletPatterns.Straight(power);
+            default:
+                return BulletPatterns.Straight(power);
+        }
+    }
+
+    static TransformData SineMove(TransformData startData, float speed, float time)
+    {
+        var SineUpDown = Vector3.right * Mathf.Sin(time) * 1 * speed;
+        var forward = startData.Rotation * Vector3.forward * (speed * time);
+
+        startData.Position = startData.Position + forward + SineUpDown;
+
+        return startData;
+    }
 }
 public struct AmmoInit : IComponentData { }

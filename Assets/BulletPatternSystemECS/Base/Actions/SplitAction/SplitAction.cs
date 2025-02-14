@@ -1,3 +1,4 @@
+using Unity.Transforms;
 using UnityEngine;
 
 public struct SplitAction : IAction
@@ -43,7 +44,7 @@ public struct SplitAction : IAction
         }
     }
 
-    public void EndAction()
+    public void EndAction(ref LocalTransform localTransform)
     {
         if (DestroyOnEnd)
         {

@@ -10,7 +10,7 @@ public static class BulletPatterns
     {
         new TransformAction
         {
-            Duration = 1111111,
+            Duration = 1,
             StartTime = 0,
 
             Action = TransformAction.MoveForward,

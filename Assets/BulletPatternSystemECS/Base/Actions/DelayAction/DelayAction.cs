@@ -1,4 +1,5 @@
 using System;
+using Unity.Transforms;
 using UnityEngine;
 
 /// <summary>
@@ -36,7 +37,7 @@ public struct DelayAction : IAction
         }
     }
 
-    public void EndAction()
+    public void EndAction(ref LocalTransform localTransform)
     {
 
     }

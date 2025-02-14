@@ -5,10 +5,7 @@ using Unity.Transforms;
 [UpdateBefore(typeof(AmmoSystem))]
 public partial class AmmoInitSystem : SystemBase
 {
-    protected override void OnCreate() 
-    {
-        RequireForUpdate<AmmoInit>();
-    }
+    protected override void OnCreate() { }
     protected override void OnDestroy() { }
     protected override void OnUpdate()
     {
@@ -17,6 +14,7 @@ public partial class AmmoInitSystem : SystemBase
         EntityCommandBuffer ecb = ecbSingleton.CreateCommandBuffer(EntityManager.WorldUnmanaged);
 
         Entities.WithName("AmmoInit")
+           .WithAll<AmmoInit>()
            .ForEach((
                Entity e,
                ref LocalTransform localTransform, in AmmoData ammoData) =>
@@ -42,7 +40,7 @@ public partial class AmmoInitSystem : SystemBase
                switch (ammoData.CurrentActionType)
                {
                    case ActionTypes.TransformAction:
-                       ammoData.CurrentTransformAction.ReadyAction(ref localTransform);
+                       ammoData.CurrentTransformAction.ReadyAction(localTransform);
                        break;
                    case ActionTypes.DelayAction:
                        //data.CurrentDelayAction.ReadyAction();

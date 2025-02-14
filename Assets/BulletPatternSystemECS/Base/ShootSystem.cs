@@ -1,37 +1,28 @@
-using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Transforms;
 
 [DisableAutoCreation]
-public partial class ShootSystem : SystemBase
+public partial struct GunSystem : ISystem
 {
     ComponentLookup<LocalTransform> localTransformLU;
 
-    protected override void OnCreate() 
+    public void OnCreate(ref SystemState state)
     {
-        localTransformLU = GetComponentLookup<LocalTransform>(false);
+        localTransformLU = state.GetComponentLookup<LocalTransform>(false);
     }
-    protected override void OnDestroy() { }
-    protected override void OnUpdate()
+    public void OnDestroy(ref SystemState state) { }
+    public void OnUpdate(ref SystemState state)
     {
-        //CompleteDependency();
+        var ecbSingleton = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
+        EntityCommandBuffer ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
 
-        //var ecbSingleton = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
-        //EntityCommandBuffer ecb = ecbSingleton.CreateCommandBuffer(EntityManager.WorldUnmanaged);
+        localTransformLU.Update(ref state);
 
-        var ecb = new EntityCommandBuffer(Allocator.TempJob);
-
-        //localTransformLU.Update(this);
-
-        //DoJobs(ref ecb, ref localTransformLU);
-
-        Dependency.Complete();
-        ecb.Playback(EntityManager);
-        ecb.Dispose();
+        DoJobs(ref state, ref ecb, ref localTransformLU);
     }
 
     void DoJobs(
+        ref SystemState state,
         ref EntityCommandBuffer ecb,
         ref ComponentLookup<LocalTransform> localTransformLU)
     {
@@ -54,20 +45,20 @@ public partial struct ShootJob : IJobEntity
 
     public ComponentLookup<LocalTransform> localTransformLU;
 
-    void Execute(ShootData shootData)
+    void Execute(ref GunData shootData)
     {
         bool HaveAmmo = shootData.CurrentAmmoCount > 0;
         bool HaveMag = shootData.CurrentMagazineCount > 0;
 
         // Update()
         {
+            shootData.ShootTimer += DeltaTime;
+
             if (HaveAmmo)
             {
                 // AttemptShoot()
                 {
-                    shootData.ShootTimer += DeltaTime;
-
-                    if (shootData.ShootTimer >= shootData.ShootDelay)
+                    if (shootData.ShootTimer >= shootData.GunStats.ShootDelay)
                     {
                         shootData.ShootTimer = 0;
 
@@ -82,9 +73,7 @@ public partial struct ShootJob : IJobEntity
 
                             AmmoData ammoData = new()
                             {
-                                //Patterns = BulletPatterns.Straight(2),
-                                Patterns = shootData.Patterns,
-
+                                Patterns = AmmoData.GetPattern(shootData.PatternSelect, shootData.GunStats.Power),
                                 CurrentIndex = 0,
                                 CurrentActionTimer = 0
                             };
@@ -105,14 +94,14 @@ public partial struct ShootJob : IJobEntity
                     {
                         shootData.ReloadTimer += DeltaTime;
 
-                        if (shootData.ReloadTimer >= shootData.ReloadDelay)
+                        if (shootData.ReloadTimer >= shootData.GunStats.ReloadDelay)
                         {
-                            shootData.ReloadTimer -= shootData.ReloadDelay;
+                            shootData.ReloadTimer -= shootData.GunStats.ReloadDelay;
 
                             // Reload()
                             {
                                 shootData.CurrentMagazineCount--;
-                                shootData.CurrentAmmoCount = shootData.MagazineCapacity;
+                                shootData.CurrentAmmoCount = shootData.GunStats.MagazineCapacity;
                             }
                         }
                     }

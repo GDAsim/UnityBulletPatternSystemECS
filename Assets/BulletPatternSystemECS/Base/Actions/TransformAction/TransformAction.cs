@@ -1,5 +1,6 @@
 using System;
 using Unity.Transforms;
+using UnityEngine;
 
 public partial struct TransformAction : IAction
 {
@@ -10,7 +11,6 @@ public partial struct TransformAction : IAction
     /// </summary>
     public bool IsDeltaAction;
 
-    LocalTransform transform;
     TransformData startData;
     TransformData prevData;
     float timer;
@@ -28,10 +28,8 @@ public partial struct TransformAction : IAction
     /// <summary>
     /// Prep Function - Call Once Before Update
     /// </summary>
-    public void ReadyAction(ref LocalTransform transform)
+    public void ReadyAction(LocalTransform transform)
     {
-        this.transform = transform;
-
         startData = new(transform);
 
         timer = StartTime;
@@ -43,26 +41,7 @@ public partial struct TransformAction : IAction
     /// Update Function
     /// Delta time is required in case for a custom time implementation
     /// </summary>
-    public void DoAction(float deltatime)
-    {
-        timer += deltatime;
-
-        var transformData = Action.Invoke(startData, ActionSpeed, timer);
-
-        if (IsDeltaAction)
-        {
-            var delta = transformData - prevData;
-            delta.AddTo(ref transform);
-        }
-        else
-        {
-            transformData.ApplyTo(ref transform);
-        }
-
-        prevData = transformData;
-    }
-
-    public void DoAction2(float deltatime, ref LocalTransform localTransform)
+    public void DoAction(float deltatime, ref LocalTransform localTransform)
     {
         timer += deltatime;
 
@@ -81,7 +60,7 @@ public partial struct TransformAction : IAction
         prevData = transformData;
     }
 
-    public void EndAction()
+    public void EndAction(ref LocalTransform localTransform)
     {
         if (Action == null) return;
 
@@ -90,11 +69,11 @@ public partial struct TransformAction : IAction
         if (IsDeltaAction)
         {
             var delta = transformData - prevData;
-            delta.AddTo(ref transform);
+            delta.AddTo(ref localTransform);
         }
         else
         {
-            transformData.ApplyTo(ref transform);
+            transformData.ApplyTo(ref localTransform);
         }
     }
 }
