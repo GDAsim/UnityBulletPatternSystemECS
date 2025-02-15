@@ -7,8 +7,8 @@ namespace SimpleGun
     public class SimpleGunController : MonoBehaviour
     {
         [SerializeField] GunStats baseStats;
-
         [SerializeField] Gun gun;
+        [SerializeField] GunPatternSelect PatternSelect;
 
         class Baker : Baker<SimpleGunController>
         {
@@ -21,7 +21,7 @@ namespace SimpleGun
                 var gunSetupData = new GunSetupData
                 {
                     GunStats = authoring.baseStats.GetStruct(),
-                    PatternSelect = GunPatternSelect.Straight,
+                    PatternSelect = authoring.PatternSelect,
                     GunEntity = GetEntity(authoring.gun, TransformUsageFlags.Dynamic),
                 };
 
