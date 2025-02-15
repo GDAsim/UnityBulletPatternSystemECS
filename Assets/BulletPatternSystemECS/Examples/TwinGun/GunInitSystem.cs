@@ -31,7 +31,7 @@ namespace TwinGun
 
                 state.EntityManager.SetComponentEnabled<GunData>(setupData_RO.GunEntity, true);
 
-                ecb.RemoveComponent<GunSetupData>(entity);
+                ecb.DestroyEntity(entity);
             }
         }
     }

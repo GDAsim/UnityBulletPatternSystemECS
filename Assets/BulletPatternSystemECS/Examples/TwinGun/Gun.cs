@@ -37,7 +37,6 @@ namespace TwinGun
                 SetComponentEnabled<GunData>(baseEntity, false);
             }
         }
-
         public static IAction[] GetPattern(GunPatternSelect select, float power)
         {
             switch (select)
@@ -45,9 +44,9 @@ namespace TwinGun
                 case GunPatternSelect.Straight:
                     return BulletPatterns.Straight(power);
                 case GunPatternSelect.SineRight:
-                    return BulletPatterns.Sine(power, Vector3.left, 1f);
+                    return BulletPatterns.Sine(power, Vector3.right, 0.2f);
                 case GunPatternSelect.SineLeft:
-                    return BulletPatterns.Sine(power, Vector3.left, 1f);
+                    return BulletPatterns.Sine(power, Vector3.left, 0.2f);
                 default:
                     throw new NotImplementedException();
             }

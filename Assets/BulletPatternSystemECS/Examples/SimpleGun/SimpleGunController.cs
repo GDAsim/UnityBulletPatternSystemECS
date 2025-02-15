@@ -15,17 +15,14 @@ namespace SimpleGun
             public override void Bake(SimpleGunController authoring)
             {
                 DependsOn(authoring.baseStats);
-
-                var baseEntity = GetEntity(TransformUsageFlags.Dynamic);
-
-                var gunSetupData = new GunSetupData
+                
+                var EntityA = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
+                AddComponent(EntityA, new GunSetupData
                 {
                     GunStats = authoring.baseStats.GetStruct(),
                     PatternSelect = authoring.PatternSelect,
                     GunEntity = GetEntity(authoring.gun, TransformUsageFlags.Dynamic),
-                };
-
-                AddComponent(baseEntity, gunSetupData);
+                });
             }
         }
     }

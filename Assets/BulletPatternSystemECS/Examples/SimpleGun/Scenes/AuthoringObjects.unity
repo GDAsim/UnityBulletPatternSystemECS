@@ -251,7 +251,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7709b4e7f40976e459daec9aad11ecd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AmmoPrefab: {fileID: 8295264336154564726, guid: 8b9741c44b50ec4428fcc644ccca6246, type: 3}
+  AmmoPrefab: {fileID: 8295264336154564726, guid: 8f63f028f02901648860e469cb814407, type: 3}
   CustomFirePos: {fileID: 0}
 --- !u!4 &1376862141
 Transform:
@@ -262,7 +262,7 @@ Transform:
   m_GameObject: {fileID: 1376862139}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.752}
+  m_LocalPosition: {x: 0, y: 0, z: 0.75}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -542,7 +542,7 @@ Transform:
   m_GameObject: {fileID: 817202795265156609}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.752}
+  m_LocalPosition: {x: 0, y: 0, z: 0.75}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -637,7 +637,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7709b4e7f40976e459daec9aad11ecd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AmmoPrefab: {fileID: 8295264336154564726, guid: 8b9741c44b50ec4428fcc644ccca6246, type: 3}
+  AmmoPrefab: {fileID: 8295264336154564726, guid: 8f63f028f02901648860e469cb814407, type: 3}
   CustomFirePos: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
