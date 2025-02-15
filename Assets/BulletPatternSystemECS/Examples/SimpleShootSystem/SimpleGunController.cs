@@ -21,7 +21,7 @@ namespace SimpleGun
                 var gunSetupData = new GunSetupData
                 {
                     GunStats = authoring.baseStats.GetStruct(),
-                    PatternSelect = GunPatternSelect.One,
+                    PatternSelect = GunPatternSelect.Straight,
                     GunEntity = GetEntity(authoring.gun, TransformUsageFlags.Dynamic),
                 };
 
