@@ -1,7 +1,7 @@
 using System;
 using Unity.Entities;
 using UnityEngine;
-using static GunData;
+using static SimpleGun.GunData;
 
 public class Ammo : MonoBehaviour
 {
@@ -92,7 +92,7 @@ public class Ammo : MonoBehaviour
                 currentDelayAction.ReadyAction();
                 return;
             case ActionTypes.SplitAction:
-                currentSplitAction.ReadyAction(this);
+                //currentSplitAction.ReadyAction(this);
                 return;
         }
     }
@@ -140,7 +140,7 @@ public class Ammo : MonoBehaviour
 
 
 
-    
+
 }
 
 public class AmmoData : IComponentData

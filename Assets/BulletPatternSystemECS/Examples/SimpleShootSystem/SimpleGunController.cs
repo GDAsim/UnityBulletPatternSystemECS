@@ -1,6 +1,3 @@
-using static GunData;
-using Unity.Entities;
-
 namespace SimpleGun
 {
     using Unity.Entities;
@@ -32,12 +29,11 @@ namespace SimpleGun
             }
         }
     }
-}
+    public struct GunSetupData : IComponentData
+    {
+        public GunStatsStruct GunStats;
+        public GunPatternSelect PatternSelect;
 
-public struct GunSetupData : IComponentData
-{
-    public GunStatsStruct GunStats;
-    public GunPatternSelect PatternSelect;
-
-    public Entity GunEntity;
+        public Entity GunEntity;
+    }
 }
