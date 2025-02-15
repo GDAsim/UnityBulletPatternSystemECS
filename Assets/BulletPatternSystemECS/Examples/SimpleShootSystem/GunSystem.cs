@@ -1,16 +1,17 @@
 namespace SimpleGun
 {
+    using Unity.Collections;
     using Unity.Entities;
     using Unity.Transforms;
 
     [DisableAutoCreation]
     public partial struct GunSystem : ISystem
     {
-        ComponentLookup<LocalTransform> localTransformLU;
+        ComponentLookup<LocalToWorld> localTransformLU;
 
         public void OnCreate(ref SystemState state)
         {
-            localTransformLU = state.GetComponentLookup<LocalTransform>(false);
+            localTransformLU = state.GetComponentLookup<LocalToWorld>(true);
         }
         public void OnDestroy(ref SystemState state) { }
         public void OnUpdate(ref SystemState state)
@@ -26,7 +27,7 @@ namespace SimpleGun
         void DoJobs(
             ref SystemState state,
             ref EntityCommandBuffer ecb,
-            ref ComponentLookup<LocalTransform> localTransformLU)
+            ref ComponentLookup<LocalToWorld> localTransformLU)
         {
             new ShootJob
             {
@@ -45,7 +46,7 @@ namespace SimpleGun
 
         public EntityCommandBuffer Ecb;
 
-        public ComponentLookup<LocalTransform> localTransformLU;
+        [ReadOnly] public ComponentLookup<LocalToWorld> localTransformLU;
 
         void Execute(ref GunData shootData)
         {
@@ -68,10 +69,9 @@ namespace SimpleGun
                             {
                                 Entity ammoEntity = Ecb.Instantiate(shootData.AmmoPrefab);
 
-                                var spawnTransform = localTransformLU.GetRefRO(shootData.SpawnTransform).ValueRO;
-                                var bulletTransform = localTransformLU.GetRefRW(shootData.AmmoPrefab).ValueRW;
+                                var spawnTransform = localTransformLU.GetRefRO(shootData.SpawnPosRot).ValueRO;
 
-                                Ecb.SetComponent(ammoEntity, LocalTransform.FromPositionRotationScale(spawnTransform.Position, spawnTransform.Rotation, bulletTransform.Scale));
+                                Ecb.SetComponent(ammoEntity, LocalTransform.FromPositionRotationScale(spawnTransform.Position, spawnTransform.Rotation, shootData.SpawnScale));
 
                                 AmmoData ammoData = new()
                                 {

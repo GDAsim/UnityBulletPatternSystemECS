@@ -23,12 +23,13 @@ namespace SimpleGun
 
                 if (authoring.CustomFirePos != null)
                 {
-                    gunData.SpawnTransform = GetEntity(authoring.CustomFirePos, TransformUsageFlags.Dynamic);
+                    gunData.SpawnPosRot = GetEntity(authoring.CustomFirePos, TransformUsageFlags.Dynamic);
                 }
                 else
                 {
-                    gunData.SpawnTransform = baseEntity;
+                    gunData.SpawnPosRot = baseEntity;
                 }
+                gunData.SpawnScale = authoring.AmmoPrefab.transform.localScale.x;
 
                 AddComponent(baseEntity, gunData);
                 SetComponentEnabled<GunData>(baseEntity, false);
@@ -40,7 +41,8 @@ namespace SimpleGun
     {
         // Set by Baker
         public Entity AmmoPrefab;
-        public Entity SpawnTransform;
+        public Entity SpawnPosRot;
+        public float SpawnScale;
 
         // Set by Init System
         public GunStatsStruct GunStats;
