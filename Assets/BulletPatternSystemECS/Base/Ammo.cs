@@ -1,7 +1,5 @@
-using System;
 using Unity.Entities;
 using UnityEngine;
-using static SimpleGun.GunData;
 
 public class Ammo : MonoBehaviour
 {
@@ -59,7 +57,6 @@ public class Ammo : MonoBehaviour
             currentActionTimer = 0;
         }
     }
-
     void GetNextAction()
     {
         switch (patterns[currentIndex])
@@ -128,7 +125,6 @@ public class Ammo : MonoBehaviour
                 return;
         }
     }
-
     void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Player"))

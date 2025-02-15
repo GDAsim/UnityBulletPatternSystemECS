@@ -132,7 +132,7 @@ GameObject:
   - component: {fileID: 455614222}
   - component: {fileID: 455614221}
   m_Layer: 0
-  m_Name: SimpleGun
+  m_Name: SimpleGun (Sine)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -585,7 +585,7 @@ GameObject:
   - component: {fileID: 3323316680233894852}
   - component: {fileID: 5067033990588423961}
   m_Layer: 0
-  m_Name: SimpleGun
+  m_Name: SimpleGun (Straight)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
