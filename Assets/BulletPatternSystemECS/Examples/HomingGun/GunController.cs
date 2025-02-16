@@ -1,5 +1,6 @@
 namespace HomingGun
 {
+    using Unity.Burst;
     using Unity.Entities;
     using UnityEngine;
     using static GunData;
@@ -71,6 +72,8 @@ namespace HomingGun
             }
         }
     }
+
+    [BurstCompile]
     public struct GunSetupData : IComponentData
     {
         public GunStatsStruct GunStats;

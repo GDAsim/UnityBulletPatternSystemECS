@@ -25,10 +25,9 @@ namespace HomingGun
 
             var DeltaTime = SystemAPI.Time.DeltaTime;
 
-            foreach ((var shootDataRef, var homingDataRef) in SystemAPI.Query<RefRW<GunData>, RefRO<GunHomingData>>())
+            foreach ((var shootDataRef, var homingDataShared) in SystemAPI.Query<RefRW<GunData>, GunHomingData>())
             {
                 var shootDataRO = shootDataRef.ValueRO;
-                var homingData = homingDataRef.ValueRO;
 
                 bool HaveAmmo = shootDataRO.CurrentAmmoCount > 0;
                 bool HaveMag = shootDataRO.CurrentMagazineCount > 0;
@@ -74,7 +73,7 @@ namespace HomingGun
 
                                     ecb.AddComponent(ammoEntity, ammoData);
                                     ecb.AddComponent(ammoEntity, new AmmoInit());
-                                    ecb.AddComponent(ammoEntity, homingDataRef.ValueRO);
+                                    ecb.AddSharedComponent(ammoEntity, homingDataShared);
 
                                     shootDataRef.ValueRW.CurrentAmmoCount--;
                                 }
@@ -116,7 +115,7 @@ namespace HomingGun
 
                         var dirToPlayer = (posVector - startData.Position).normalized;
 
-                        startData.Rotation = Quaternion.RotateTowards(startData.Rotation, Quaternion.LookRotation(dirToPlayer), homingData.HomingRate * (speed * time));
+                        startData.Rotation = Quaternion.RotateTowards(startData.Rotation, Quaternion.LookRotation(dirToPlayer), homingDataShared.HomingRate * (speed * time));
                     }
 
                     Vector3 forward = startData.Rotation * Vector3.forward * (speed * time);

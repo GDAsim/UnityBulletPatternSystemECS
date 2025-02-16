@@ -29,7 +29,7 @@ namespace HomingGun
                 var gunDataRef = gunDataLU.GetRefRW(setupData_RO.GunEntity);
                 gunDataRef.ValueRW.Setup(setupData_RO.GunStats, setupData_RO.PatternSelect);
 
-                ecb.AddComponent(setupData_RO.GunEntity, setupData_RO.GunHomingData);
+                ecb.AddSharedComponent(setupData_RO.GunEntity, setupData_RO.GunHomingData);
 
                 state.EntityManager.SetComponentEnabled<GunData>(setupData_RO.GunEntity, true);
 

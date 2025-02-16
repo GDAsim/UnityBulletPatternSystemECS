@@ -82,7 +82,7 @@ namespace SimpleGun
 
                                 Ecb.AddComponent(ammoEntity, ammoData);
                                 Ecb.AddComponent(ammoEntity, new AmmoInit());
-                                Ecb.AddComponent(ammoEntity, new HomingGun.GunHomingData());
+                                Ecb.AddSharedComponent(ammoEntity, new HomingGun.GunHomingData());
 
                                 shootData.CurrentAmmoCount--;
                             }

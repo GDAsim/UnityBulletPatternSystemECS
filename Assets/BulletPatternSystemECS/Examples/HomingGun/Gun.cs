@@ -1,6 +1,7 @@
 namespace HomingGun
 {
     using System;
+    using Unity.Burst;
     using Unity.Entities;
     using UnityEngine;
     using static HomingGun.GunData;
@@ -119,7 +120,8 @@ namespace HomingGun
         }
     }
 
-    public struct GunHomingData : IComponentData
+    [BurstCompile]
+    public struct GunHomingData : ISharedComponentData
     {
         [Header("Homing Properties")]
         public Entity HomingEntity;
