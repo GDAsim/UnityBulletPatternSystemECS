@@ -21,6 +21,7 @@ public interface IAction
 public enum ActionTypes
 {
     TransformAction,
-    DelayAction,
-    SplitAction
+    TransformWithEntities,
+    //DelayAction,
+    //SplitAction
 }

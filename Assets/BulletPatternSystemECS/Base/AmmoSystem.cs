@@ -1,10 +1,16 @@
+using HomingGun;
 using Unity.Entities;
 using Unity.Transforms;
 
 [DisableAutoCreation]
 public partial class AmmoSystem : SystemBase
 {
-    protected override void OnCreate() { }
+    ComponentLookup<LocalToWorld> localTransformLU;
+
+    protected override void OnCreate() 
+    {
+        localTransformLU = GetComponentLookup<LocalToWorld>(true);
+    }
     protected override void OnDestroy() { }
     protected override void OnUpdate()
     {
@@ -12,15 +18,23 @@ public partial class AmmoSystem : SystemBase
 
         EntityCommandBuffer ecb = ecbSingleton.CreateCommandBuffer(EntityManager.WorldUnmanaged);
 
+        localTransformLU.Update(this);
+
         var DeltaTime = SystemAPI.Time.DeltaTime;
 
         Entities.WithName("AmmoUpdate")
             .ForEach((
-                ref LocalTransform localTransform, in AmmoData ammoData) =>
+                ref LocalTransform localTransform, in AmmoData ammoData, in GunHomingData homingData) =>
             {
                 if (ammoData.Patterns == null || ammoData.Patterns.Length == 0)
                 {
                     return;
+                }
+
+                LocalToWorld homingTransform = default;
+                if (localTransformLU.HasComponent(homingData.HomingEntity))
+                {
+                    homingTransform = localTransformLU.GetRefRO(homingData.HomingEntity).ValueRO;
                 }
 
                 ammoData.CurrentActionTimer += DeltaTime;
@@ -33,13 +47,9 @@ public partial class AmmoSystem : SystemBase
                         ammoData.CurrentTransformAction.DoAction(DeltaTime, ref localTransform);
                         DoAction = ammoData.CurrentActionTimer >= ammoData.CurrentTransformAction.Duration;
                         break;
-                    case ActionTypes.DelayAction:
-                        ammoData.CurrentDelayAction.DoAction();
-                        DoAction = ammoData.CurrentActionTimer >= ammoData.CurrentDelayAction.Duration;
-                        break;
-                    case ActionTypes.SplitAction:
-                        ammoData.CurrentSplitAction.DoAction();
-                        DoAction = true;
+                    case ActionTypes.TransformWithEntities:
+                        ammoData.CurrentTransformWithEntitiesAction.DoAction(DeltaTime, ref localTransform, new LocalToWorld[] { homingTransform });
+                        DoAction = ammoData.CurrentActionTimer >= ammoData.CurrentTransformWithEntitiesAction.Duration;
                         break;
                     default:
                         throw new System.Exception("Not Implemented");
@@ -53,11 +63,8 @@ public partial class AmmoSystem : SystemBase
                         case ActionTypes.TransformAction:
                             ammoData.CurrentTransformAction.EndAction(ref localTransform);
                             break;
-                        case ActionTypes.DelayAction:
-                            //data.CurrentDelayAction.EndAction();
-                            break;
-                        case ActionTypes.SplitAction:
-                            //data.CurrentSplitAction.EndAction();
+                        case ActionTypes.TransformWithEntities:
+                            ammoData.CurrentTransformWithEntitiesAction.EndAction(ref localTransform, new LocalToWorld[] { homingTransform });
                             break;
                     }
 
@@ -68,13 +75,9 @@ public partial class AmmoSystem : SystemBase
                             ammoData.CurrentTransformAction = action;
                             ammoData.CurrentActionType = ActionTypes.TransformAction;
                             break;
-                        case DelayAction action:
-                            //data.CurrentDelayAction = action;
-                            //data.CurrentActionType = ActionTypes.DelayAction;
-                            break;
-                        case SplitAction action:
-                            //data.CurrentSplitAction = action;
-                            //data.CurrentActionType = ActionTypes.SplitAction;
+                        case TransformWithEntitiesAction action:
+                            ammoData.CurrentTransformWithEntitiesAction = action;
+                            ammoData.CurrentActionType = ActionTypes.TransformWithEntities;
                             break;
                     }
 
@@ -86,11 +89,8 @@ public partial class AmmoSystem : SystemBase
                         case ActionTypes.TransformAction:
                             ammoData.CurrentTransformAction.ReadyAction(localTransform);
                             break;
-                        case ActionTypes.DelayAction:
-                            //data.CurrentDelayAction.ReadyAction();
-                            break;
-                        case ActionTypes.SplitAction:
-                            //data.CurrentSplitAction.ReadyAction(this);
+                        case ActionTypes.TransformWithEntities:
+                            ammoData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, new LocalToWorld[] { homingTransform });
                             break;
                     }
 

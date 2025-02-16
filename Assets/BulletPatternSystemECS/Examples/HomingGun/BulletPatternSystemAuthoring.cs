@@ -14,10 +14,6 @@ namespace HomingGun
                 var ammoinitSystemHandle = World.DefaultGameObjectInjectionWorld.CreateSystem<AmmoInitSystem>();
                 var ammoSystemHandle = World.DefaultGameObjectInjectionWorld.CreateSystem<AmmoSystem>();
 
-                var aa = World.DefaultGameObjectInjectionWorld.CreateSystem<MoveSystem>();
-
-                
-
                 var SimSG = World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<SimulationSystemGroup>();
 
                 // ===========================  SimulationSystemGroup       ===========================
@@ -25,8 +21,6 @@ namespace HomingGun
                 SimSG.AddSystemToUpdateList(gunSystemHandle);
                 SimSG.AddSystemToUpdateList(ammoinitSystemHandle);
                 SimSG.AddSystemToUpdateList(ammoSystemHandle);
-
-                SimSG.AddSystemToUpdateList(aa);
 
             }
         }

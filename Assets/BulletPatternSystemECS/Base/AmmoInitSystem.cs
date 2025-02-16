@@ -1,3 +1,4 @@
+using HomingGun;
 using Unity.Entities;
 using Unity.Transforms;
 
@@ -5,7 +6,12 @@ using Unity.Transforms;
 [UpdateBefore(typeof(AmmoSystem))]
 public partial class AmmoInitSystem : SystemBase
 {
-    protected override void OnCreate() { }
+    ComponentLookup<LocalToWorld> localTransformLU;
+
+    protected override void OnCreate()
+    {
+        localTransformLU = GetComponentLookup<LocalToWorld>(true);
+    }
     protected override void OnDestroy() { }
     protected override void OnUpdate()
     {
@@ -13,12 +19,20 @@ public partial class AmmoInitSystem : SystemBase
 
         EntityCommandBuffer ecb = ecbSingleton.CreateCommandBuffer(EntityManager.WorldUnmanaged);
 
+        localTransformLU.Update(this);
+
         Entities.WithName("AmmoInit")
            .WithAll<AmmoInit>()
            .ForEach((
                Entity e,
-               ref LocalTransform localTransform, in AmmoData ammoData) =>
+               ref LocalTransform localTransform, in AmmoData ammoData, in GunHomingData homingData) =>
            {
+               LocalToWorld homingTransform = default;
+               if (localTransformLU.HasComponent(homingData.HomingEntity))
+               {
+                   homingTransform = localTransformLU.GetRefRO(homingData.HomingEntity).ValueRO;
+               }
+
                // GetNextAction();
                switch (ammoData.Patterns[ammoData.CurrentIndex])
                {
@@ -26,13 +40,9 @@ public partial class AmmoInitSystem : SystemBase
                        ammoData.CurrentTransformAction = action;
                        ammoData.CurrentActionType = ActionTypes.TransformAction;
                        break;
-                   case DelayAction action:
-                       //data.CurrentDelayAction = action;
-                       //data.CurrentActionType = ActionTypes.DelayAction;
-                       break;
-                   case SplitAction action:
-                       //data.CurrentSplitAction = action;
-                       //data.CurrentActionType = ActionTypes.SplitAction;
+                   case TransformWithEntitiesAction action:
+                       ammoData.CurrentTransformWithEntitiesAction = action;
+                       ammoData.CurrentActionType = ActionTypes.TransformWithEntities;
                        break;
                }
 
@@ -42,11 +52,8 @@ public partial class AmmoInitSystem : SystemBase
                    case ActionTypes.TransformAction:
                        ammoData.CurrentTransformAction.ReadyAction(localTransform);
                        break;
-                   case ActionTypes.DelayAction:
-                       //data.CurrentDelayAction.ReadyAction();
-                       break;
-                   case ActionTypes.SplitAction:
-                       //data.CurrentSplitAction.ReadyAction(this);
+                   case ActionTypes.TransformWithEntities:
+                       ammoData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, new LocalToWorld[] { homingTransform });
                        break;
                }
 
