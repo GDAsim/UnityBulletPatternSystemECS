@@ -160,6 +160,7 @@ GameObject:
   m_Component:
   - component: {fileID: 745246412}
   - component: {fileID: 745246413}
+  - component: {fileID: 745246414}
   m_Layer: 0
   m_Name: Gun
   m_TagString: Untagged
@@ -197,6 +198,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AmmoPrefab: {fileID: 8295264336154564726, guid: 801cfe27d30b608429ac8982968faba7, type: 3}
   CustomFirePos: {fileID: 0}
+--- !u!65 &745246414
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 745246411}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &827726456
 GameObject:
   m_ObjectHideFlags: 0

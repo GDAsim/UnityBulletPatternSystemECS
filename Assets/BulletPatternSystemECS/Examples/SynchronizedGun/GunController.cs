@@ -21,8 +21,6 @@ namespace SynchronizedGun
         {
             public override void Bake(GunController authoring)
             {
-                DependsOn(authoring.baseStats);
-
                 if (authoring.snycType == SyncType.ShootMoveSync)
                 {
                     var EntityA = CreateAdditionalEntity(TransformUsageFlags.Dynamic);

@@ -33,49 +33,63 @@ namespace SynchronizedGun
                 gunData.Setup(setupData_RO.GunStats, setupData_RO.PatternSelect);
                 gunData.WithEntities = setupData_RO.WithEntities;
 
-
-
-                var systemPattern = new IAction[]
+                // SetupPreShoot
                 {
-                    new TransformWithEntitiesAction
+                    IAction[] systemPattern = default;
+                    float StartSystemDelay = 0;
+                    switch (setupData_RO.PatternSelect)
                     {
-                        Duration = gunData.GunStats.ShootDelay,
-                        StartTime = 0,
+                        case GunData.GunPatternSelect.ShootMoveSync:
+                        case GunData.GunPatternSelect.BulletMoveSync:
+                            systemPattern = new IAction[]
+                            {
+                                new TransformWithEntitiesAction
+                                {
+                                    Duration = gunData.GunStats.ShootDelay,
+                                    StartTime = 0,
 
-                        Action = TranslateMove1,
-                        ActionSpeed = gunData.GunStats.Power,
-                        IsDeltaAction = false
-                    },
-                    new TransformWithEntitiesAction
-                    {
-                        Duration = gunData.GunStats.ShootDelay,
-                        StartTime = 0,
+                                    Action = TranslateMove1,
+                                    ActionSpeed = gunData.GunStats.Power,
+                                    IsDeltaAction = false
+                                },
+                                new TransformWithEntitiesAction
+                                {
+                                    Duration = gunData.GunStats.ShootDelay,
+                                    StartTime = 0,
 
-                        Action = TranslateMove2,
-                        ActionSpeed = gunData.GunStats.Power,
-                        IsDeltaAction = false
-                    },
-                    new TransformWithEntitiesAction
-                    {
-                        Duration = gunData.GunStats.ShootDelay,
-                        StartTime = 0,
+                                    Action = TranslateMove2,
+                                    ActionSpeed = gunData.GunStats.Power,
+                                    IsDeltaAction = false
+                                },
+                                new TransformWithEntitiesAction
+                                {
+                                    Duration = gunData.GunStats.ShootDelay,
+                                    StartTime = 0,
 
-                        Action = TranslateMove3,
-                        ActionSpeed = gunData.GunStats.Power,
-                        IsDeltaAction = false
-                    },
-                    new TransformWithEntitiesAction
-                    {
-                        Duration = gunData.GunStats.ShootDelay,
-                        StartTime = 0,
+                                    Action = TranslateMove3,
+                                    ActionSpeed = gunData.GunStats.Power,
+                                    IsDeltaAction = false
+                                },
+                                new TransformWithEntitiesAction
+                                {
+                                    Duration = gunData.GunStats.ShootDelay,
+                                    StartTime = 0,
 
-                        Action = TranslateMove4,
-                        ActionSpeed = gunData.GunStats.Power,
-                        IsDeltaAction = false
-                    },
-                };
+                                    Action = TranslateMove4,
+                                    ActionSpeed = gunData.GunStats.Power,
+                                    IsDeltaAction = false
+                                },
+                            };
+                            StartSystemDelay = 0;
+                            break;
+                        default:
+                            throw new System.Exception();
+                    }
 
-                gunData.Patterns = systemPattern;
+                    gunData.Patterns = systemPattern;
+                    gunData.CurrentActionTimer = -StartSystemDelay;
+                }
+                
 
                 if (gunData.Patterns != null && gunData.Patterns.Length >= 0)
                 {
@@ -110,6 +124,8 @@ namespace SynchronizedGun
                             gunData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, entitiesTransform);
                             break;
                     }
+
+                    if (++gunData.CurrentIndex == gunData.Patterns.Length) gunData.CurrentIndex = 0;
                 }
 
                 ecb.SetComponent(setupData_RO.GunEntity, gunData);

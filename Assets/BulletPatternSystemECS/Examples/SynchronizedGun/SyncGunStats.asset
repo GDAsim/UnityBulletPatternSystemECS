@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: SyncGunStats
   m_EditorClassIdentifier: 
   MagazineCount: 2147483647
-  MagazineCapacity: 2147483647
+  MagazineCapacity: 4
   ReloadDelay: 0
-  ShootDelay: 1
+  ShootDelay: 0.3
   Power: 1
   StartShootDelay: 0

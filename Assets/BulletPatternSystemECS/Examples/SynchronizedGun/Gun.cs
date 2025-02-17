@@ -64,6 +64,9 @@ namespace SynchronizedGun
         public float ShootTimer;
         public float ReloadTimer;
 
+        public int TotalShootCount { get; set; }
+        public bool Has4ShootCycleEnd => TotalShootCount % GunStats.MagazineCapacity == 0;
+
         public void Setup(GunStatsStruct GunStats, GunPatternSelect PatternSelect)
         {
             this.GunStats = GunStats;
