@@ -5,11 +5,11 @@ using Unity.Transforms;
 [DisableAutoCreation]
 public partial class AmmoSystem : SystemBase
 {
-    ComponentLookup<LocalToWorld> localTransformLU;
+    ComponentLookup<LocalTransform> localTransformLU;
 
     protected override void OnCreate()
     {
-        localTransformLU = GetComponentLookup<LocalToWorld>(true);
+        localTransformLU = GetComponentLookup<LocalTransform>(true);
     }
     protected override void OnDestroy() { }
     protected override void OnUpdate()
@@ -43,7 +43,7 @@ public partial class AmmoSystem : SystemBase
                         DoAction = ammoData.CurrentActionTimer >= ammoData.CurrentTransformAction.Duration;
                         break;
                     case ActionTypes.TransformWithEntities:
-                        ammoData.CurrentTransformWithEntitiesAction.DoAction(DeltaTime, ref localTransform, new LocalToWorld[] { });
+                        ammoData.CurrentTransformWithEntitiesAction.DoAction(DeltaTime, ref localTransform, new LocalTransform[] { });
                         DoAction = ammoData.CurrentActionTimer >= ammoData.CurrentTransformWithEntitiesAction.Duration;
                         break;
                     default:
@@ -59,7 +59,7 @@ public partial class AmmoSystem : SystemBase
                             ammoData.CurrentTransformAction.EndAction(ref localTransform);
                             break;
                         case ActionTypes.TransformWithEntities:
-                            ammoData.CurrentTransformWithEntitiesAction.EndAction(ref localTransform, new LocalToWorld[] { });
+                            ammoData.CurrentTransformWithEntitiesAction.EndAction(ref localTransform, new LocalTransform[] { });
                             break;
                     }
 
@@ -85,7 +85,7 @@ public partial class AmmoSystem : SystemBase
                             ammoData.CurrentTransformAction.ReadyAction(localTransform);
                             break;
                         case ActionTypes.TransformWithEntities:
-                            ammoData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, new LocalToWorld[] { });
+                            ammoData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, new LocalTransform[] { });
                             break;
                     }
 
@@ -103,12 +103,12 @@ public partial class AmmoSystem : SystemBase
                     return;
                 }
 
-                LocalToWorld homingTransform = default;
+                LocalTransform homingTransform = default;
                 if (localTransformLU.HasComponent(homingData.HomingEntity))
                 {
                     homingTransform = localTransformLU[homingData.HomingEntity];
                 }
-                LocalToWorld gunTransform = default;
+                LocalTransform gunTransform = default;
                 if (localTransformLU.HasComponent(homingData.GunEntity))
                 {
                     gunTransform = localTransformLU[homingData.GunEntity];
@@ -125,7 +125,7 @@ public partial class AmmoSystem : SystemBase
                         DoAction = ammoData.CurrentActionTimer >= ammoData.CurrentTransformAction.Duration;
                         break;
                     case ActionTypes.TransformWithEntities:
-                        ammoData.CurrentTransformWithEntitiesAction.DoAction(DeltaTime, ref localTransform, new LocalToWorld[] { homingTransform, gunTransform });
+                        ammoData.CurrentTransformWithEntitiesAction.DoAction(DeltaTime, ref localTransform, new LocalTransform[] { homingTransform, gunTransform });
                         DoAction = ammoData.CurrentActionTimer >= ammoData.CurrentTransformWithEntitiesAction.Duration;
                         break;
                     default:
@@ -141,7 +141,7 @@ public partial class AmmoSystem : SystemBase
                             ammoData.CurrentTransformAction.EndAction(ref localTransform);
                             break;
                         case ActionTypes.TransformWithEntities:
-                            ammoData.CurrentTransformWithEntitiesAction.EndAction(ref localTransform, new LocalToWorld[] { homingTransform, gunTransform });
+                            ammoData.CurrentTransformWithEntitiesAction.EndAction(ref localTransform, new LocalTransform[] { homingTransform, gunTransform });
                             break;
                     }
 
@@ -167,7 +167,7 @@ public partial class AmmoSystem : SystemBase
                             ammoData.CurrentTransformAction.ReadyAction(localTransform);
                             break;
                         case ActionTypes.TransformWithEntities:
-                            ammoData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, new LocalToWorld[] { homingTransform , gunTransform });
+                            ammoData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, new LocalTransform[] { homingTransform , gunTransform });
                             break;
                     }
 

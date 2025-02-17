@@ -26,11 +26,19 @@ namespace SynchronizedGun
                 if (authoring.snycType == SyncType.ShootMoveSync)
                 {
                     var EntityA = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
-                    AddComponent(EntityA, new GunSetupData
+                    AddComponentObject(EntityA, new GunSetupData
                     {
                         GunStats = authoring.baseStats.GetStruct(),
                         PatternSelect = GunPatternSelect.ShootMoveSync,
                         GunEntity = GetEntity(authoring.Gun, TransformUsageFlags.Dynamic),
+
+                        WithEntities = new Entity[]
+                        {
+                            GetEntity(authoring.Pos1, TransformUsageFlags.Dynamic),
+                            GetEntity(authoring.Pos2, TransformUsageFlags.Dynamic),
+                            GetEntity(authoring.Pos3, TransformUsageFlags.Dynamic),
+                            GetEntity(authoring.Pos4, TransformUsageFlags.Dynamic),
+                        }
                     });
                 }
                 else if (authoring.snycType == SyncType.BulletMoveSync)
@@ -40,10 +48,11 @@ namespace SynchronizedGun
             }
         }
     }
-    public struct GunSetupData : IComponentData
+    public class GunSetupData : IComponentData
     {
         public GunStatsStruct GunStats;
         public GunPatternSelect PatternSelect;
+        public Entity[] WithEntities;
 
         public Entity GunEntity;
     }

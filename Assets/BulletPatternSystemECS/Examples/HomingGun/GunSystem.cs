@@ -157,7 +157,7 @@ namespace HomingGun
                             throw new NotImplementedException();
                     }
 
-                    TransformData SimpleHoming(TransformData startData, float speed, float time, LocalToWorld[] entities)
+                    TransformData SimpleHoming(TransformData startData, float speed, float time, LocalTransform[] entities)
                     {
                         var hasHoming = entities.Length > 0;
                         if (hasHoming)
@@ -176,7 +176,7 @@ namespace HomingGun
                         return startData;
                     }
 
-                    TransformData DistanceProximityHoming(TransformData startData, float speed, float time, LocalToWorld[] entities)
+                    TransformData DistanceProximityHoming(TransformData startData, float speed, float time, LocalTransform[] entities)
                     {
                         var hasHoming = entities.Length > 0;
                         if (hasHoming)
@@ -200,7 +200,7 @@ namespace HomingGun
                         return startData;
                     }
 
-                    TransformData LimitedProximityHoming(TransformData startData, float speed, float time, LocalToWorld[] entities)
+                    TransformData LimitedProximityHoming(TransformData startData, float speed, float time, LocalTransform[] entities)
                     {
                         var hasHoming = entities.Length > 0;
                         if (hasHoming)
@@ -225,7 +225,7 @@ namespace HomingGun
                         return startData;
                     }
 
-                    TransformData AcceleratedHoming(TransformData startData, float speed, float time, LocalToWorld[] entities)
+                    TransformData AcceleratedHoming(TransformData startData, float speed, float time, LocalTransform[] entities)
                     {
                         var hasHoming = entities.Length > 0;
                         if (hasHoming)

@@ -33,25 +33,12 @@ namespace SynchronizedGun
                 }
                 gunData.SpawnScale = authoring.AmmoPrefab.transform.localScale.x;
 
-                AddComponent(baseEntity, gunData);
-                SetComponentEnabled<GunData>(baseEntity, false);
-            }
-        }
-        public static IAction[] GetBulletPattern(GunPatternSelect select, float power)
-        {
-            switch (select)
-            {
-                case GunPatternSelect.ShootMoveSync:
-                    return BulletPatterns.Straight(power);
-                case GunPatternSelect.BulletMoveSync:
-                    return BulletPatterns.Straight(power);
-                default:
-                    throw new NotImplementedException();
+                AddComponentObject(baseEntity, gunData);
             }
         }
     }
 
-    public struct GunData : IComponentData, IEnableableComponent
+    public class GunData : IComponentData, IEnableableComponent
     {
         // Set by Baker
         public Entity AmmoPrefab;
@@ -59,6 +46,16 @@ namespace SynchronizedGun
         public float SpawnScale;
 
         // Set by Init System
+        public IAction[] Patterns;
+        public int CurrentIndex;
+
+        public ActionTypes CurrentActionType;
+        public TransformAction CurrentTransformAction;
+        public TransformWithEntitiesAction CurrentTransformWithEntitiesAction;
+        public Entity[] WithEntities;
+
+        public float CurrentActionTimer;
+
         public GunStatsStruct GunStats;
         public GunPatternSelect PatternSelect;
 

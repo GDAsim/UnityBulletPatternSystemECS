@@ -4,7 +4,7 @@ using Unity.Transforms;
 
 public partial struct TransformWithEntitiesAction : IAction
 {
-    public Func<TransformData, float, float, LocalToWorld[], TransformData> Action;
+    public Func<TransformData, float, float, LocalTransform[], TransformData> Action;
 
     /// <summary>
     /// Used when the Performing Certain Action has a StartTimer != 0
@@ -28,7 +28,7 @@ public partial struct TransformWithEntitiesAction : IAction
     /// <summary>
     /// Prep Function - Call Once Before Update
     /// </summary>
-    public void ReadyAction(LocalTransform transform, LocalToWorld[] entities)
+    public void ReadyAction(LocalTransform transform, LocalTransform[] entities)
     {
         startData = new(transform);
 
@@ -41,7 +41,7 @@ public partial struct TransformWithEntitiesAction : IAction
     /// Update Function
     /// Delta time is required in case for a custom time implementation
     /// </summary>
-    public void DoAction(float deltatime, ref LocalTransform localTransform, LocalToWorld[] entities)
+    public void DoAction(float deltatime, ref LocalTransform localTransform, LocalTransform[] entities)
     {
         timer += deltatime;
 
@@ -60,7 +60,7 @@ public partial struct TransformWithEntitiesAction : IAction
         prevData = transformData;
     }
 
-    public void EndAction(ref LocalTransform localTransform, LocalToWorld[] entities)
+    public void EndAction(ref LocalTransform localTransform, LocalTransform[] entities)
     {
         if (Action == null) return;
 

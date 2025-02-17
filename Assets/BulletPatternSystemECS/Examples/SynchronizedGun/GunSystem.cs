@@ -1,114 +1,186 @@
 namespace SynchronizedGun
 {
-    using Unity.Collections;
+    using System;
     using Unity.Entities;
     using Unity.Transforms;
+    using static SynchronizedGun.GunData;
 
     [DisableAutoCreation]
-    public partial struct GunSystem : ISystem
+    public partial class GunSystem : SystemBase
     {
-        ComponentLookup<LocalToWorld> localTransformLU;
+        ComponentLookup<LocalTransform> localTransformLU;
+        ComponentLookup<LocalToWorld> transformLU;
 
-        public void OnCreate(ref SystemState state)
+        protected override void OnCreate()
         {
-            localTransformLU = state.GetComponentLookup<LocalToWorld>(true);
+            localTransformLU = GetComponentLookup<LocalTransform>(true);
+            transformLU = GetComponentLookup<LocalToWorld>(true);
         }
-        public void OnDestroy(ref SystemState state) { }
-        public void OnUpdate(ref SystemState state)
+        protected override void OnDestroy() { }
+        protected override void OnUpdate()
         {
             var ecbSingleton = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
-            EntityCommandBuffer ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
 
-            localTransformLU.Update(ref state);
+            EntityCommandBuffer ecb = ecbSingleton.CreateCommandBuffer(EntityManager.WorldUnmanaged);
 
-            DoJobs(ref state, ref ecb, ref localTransformLU);
-        }
+            localTransformLU.Update(this);
+            transformLU.Update(this);
 
-        void DoJobs(
-            ref SystemState state,
-            ref EntityCommandBuffer ecb,
-            ref ComponentLookup<LocalToWorld> localTransformLU)
-        {
-            new ShootJob
-            {
-                DeltaTime = SystemAPI.Time.DeltaTime,
+            var DeltaTime = SystemAPI.Time.DeltaTime;
 
-                Ecb = ecb,
-
-                localTransformLU = localTransformLU,
-            }.Schedule();
-        }
-    }
-
-    public partial struct ShootJob : IJobEntity
-    {
-        public float DeltaTime;
-
-        public EntityCommandBuffer Ecb;
-
-        [ReadOnly] public ComponentLookup<LocalToWorld> localTransformLU;
-
-        void Execute(ref GunData shootData)
-        {
-            bool HaveAmmo = shootData.CurrentAmmoCount > 0;
-            bool HaveMag = shootData.CurrentMagazineCount > 0;
-
-            // Update()
-            {
-                shootData.ShootTimer += DeltaTime;
-
-                if (HaveAmmo)
+            Entities.WithName("GunUpdate")
+                .WithAll<GunData>()
+                .ForEach((
+                    ref LocalTransform localTransform, in GunData gunData) =>
                 {
-                    // AttemptShoot()
+                    bool HaveAmmo = gunData.CurrentAmmoCount > 0;
+                    bool HaveMag = gunData.CurrentMagazineCount > 0;
+
+                    // Update()
                     {
-                        if (shootData.ShootTimer >= shootData.GunStats.ShootDelay)
+                        //PreShootAction()
                         {
-                            shootData.ShootTimer = 0;
-
-                            // Fire()
+                            if (gunData.Patterns != null && gunData.Patterns.Length > 0)
                             {
-                                Entity ammoEntity = Ecb.Instantiate(shootData.AmmoPrefab);
-
-                                var spawnTransform = localTransformLU.GetRefRO(shootData.SpawnPosRot).ValueRO;
-
-                                Ecb.SetComponent(ammoEntity, LocalTransform.FromPositionRotationScale(spawnTransform.Position, spawnTransform.Rotation, shootData.SpawnScale));
-
-                                AmmoData ammoData = new()
+                                LocalTransform[] entitiesTransform = new LocalTransform[gunData.WithEntities.Length];
+                                for (int i = 0; i < entitiesTransform.Length; i++)
                                 {
-                                    Patterns = Gun.GetBulletPattern(shootData.PatternSelect, shootData.GunStats.Power),
-                                    CurrentIndex = 0,
-                                    CurrentActionTimer = 0
-                                };
+                                    entitiesTransform[i] = localTransformLU[gunData.WithEntities[i]];
+                                }
 
-                                Ecb.AddComponent(ammoEntity, ammoData);
-                                Ecb.AddComponent(ammoEntity, new AmmoInit());
+                                gunData.CurrentActionTimer += DeltaTime;
 
-                                shootData.CurrentAmmoCount--;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    if (HaveMag)
-                    {
-                        // AttemptReload()
-                        {
-                            shootData.ReloadTimer += DeltaTime;
-
-                            if (shootData.ReloadTimer >= shootData.GunStats.ReloadDelay)
-                            {
-                                shootData.ReloadTimer -= shootData.GunStats.ReloadDelay;
-
-                                // Reload()
+                                // DoAction
+                                bool DoAction;
+                                switch (gunData.CurrentActionType)
                                 {
-                                    shootData.CurrentMagazineCount--;
-                                    shootData.CurrentAmmoCount = shootData.GunStats.MagazineCapacity;
+                                    case ActionTypes.TransformAction:
+                                        gunData.CurrentTransformAction.DoAction(DeltaTime, ref localTransform);
+                                        DoAction = gunData.CurrentActionTimer >= gunData.CurrentTransformAction.Duration;
+                                        break;
+                                    case ActionTypes.TransformWithEntities:
+                                        gunData.CurrentTransformWithEntitiesAction.DoAction(DeltaTime, ref localTransform, entitiesTransform);
+                                        DoAction = gunData.CurrentActionTimer >= gunData.CurrentTransformWithEntitiesAction.Duration;
+                                        break;
+                                    default:
+                                        throw new System.Exception("Not Implemented");
+                                }
+
+                                if (DoAction)
+                                {
+                                    // EndAction();
+                                    switch (gunData.CurrentActionType)
+                                    {
+                                        case ActionTypes.TransformAction:
+                                            gunData.CurrentTransformAction.EndAction(ref localTransform);
+                                            break;
+                                        case ActionTypes.TransformWithEntities:
+                                            gunData.CurrentTransformWithEntitiesAction.EndAction(ref localTransform, entitiesTransform);
+                                            break;
+                                    }
+
+                                    // GetNextAction();
+                                    switch (gunData.Patterns[gunData.CurrentIndex])
+                                    {
+                                        case TransformAction action:
+                                            gunData.CurrentTransformAction = action;
+                                            gunData.CurrentActionType = ActionTypes.TransformAction;
+                                            break;
+                                        case TransformWithEntitiesAction action:
+                                            gunData.CurrentTransformWithEntitiesAction = action;
+                                            gunData.CurrentActionType = ActionTypes.TransformWithEntities;
+                                            break;
+                                    }
+
+                                    if (++gunData.CurrentIndex == gunData.Patterns.Length) gunData.CurrentIndex = 0;
+
+                                    // ReadyAction();
+                                    switch (gunData.CurrentActionType)
+                                    {
+                                        case ActionTypes.TransformAction:
+                                            gunData.CurrentTransformAction.ReadyAction(localTransform);
+                                            break;
+                                        case ActionTypes.TransformWithEntities:
+                                            gunData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, entitiesTransform);
+                                            break;
+                                    }
+
+                                    gunData.CurrentActionTimer = 0;
                                 }
                             }
                         }
+
+                        //gunData.ShootTimer += DeltaTime;
+
+                        //if (HaveAmmo)
+                        //{
+                        //    // AttemptShoot()
+                        //    {
+                        //        if (gunData.ShootTimer >= gunData.GunStats.ShootDelay)
+                        //        {
+                        //            gunData.ShootTimer = 0;
+
+                        //            // Fire()
+                        //            {
+                        //                Entity ammoEntity = ecb.Instantiate(gunData.AmmoPrefab);
+
+                        //                var spawnTransform = transformLU.GetRefRO(gunData.SpawnPosRot).ValueRO;
+
+                        //                ecb.SetComponent(ammoEntity, LocalTransform.FromPositionRotationScale(spawnTransform.Position, spawnTransform.Rotation, gunData.SpawnScale));
+
+                        //                AmmoData ammoData = new()
+                        //                {
+                        //                    Patterns = GetBulletPattern(gunData.PatternSelect, gunData.GunStats.Power),
+                        //                    CurrentIndex = 0,
+                        //                    CurrentActionTimer = 0
+                        //                };
+
+                        //                ecb.AddComponent(ammoEntity, ammoData);
+                        //                ecb.AddComponent(ammoEntity, new AmmoInit());
+
+                        //                gunData.CurrentAmmoCount--;
+                        //            }
+                        //        }
+                        //    }
+                        //}
+                        //else
+                        //{
+                        //    if (HaveMag)
+                        //    {
+                        //        // AttemptReload()
+                        //        {
+                        //            gunData.ReloadTimer += DeltaTime;
+
+                        //            if (gunData.ReloadTimer >= gunData.GunStats.ReloadDelay)
+                        //            {
+                        //                gunData.ReloadTimer -= gunData.GunStats.ReloadDelay;
+
+                        //                // Reload()
+                        //                {
+                        //                    gunData.CurrentMagazineCount--;
+                        //                    gunData.CurrentAmmoCount = gunData.GunStats.MagazineCapacity;
+                        //                }
+                        //            }
+                        //        }
+                        //    }
+                        //}
                     }
-                }
+                })
+                .WithoutBurst().Run();
+
+            Dependency.Complete();
+        }
+
+        IAction[] GetBulletPattern(GunPatternSelect select, float power)
+        {
+            switch (select)
+            {
+                case GunPatternSelect.ShootMoveSync:
+                    return BulletPatterns.Straight(power);
+                case GunPatternSelect.BulletMoveSync:
+                    return BulletPatterns.Straight(power);
+                default:
+                    throw new NotImplementedException();
             }
         }
     }
