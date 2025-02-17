@@ -35,7 +35,7 @@ namespace SimpleGun
 
                 Ecb = ecb,
 
-                localTransformLU = localTransformLU,
+                transformLU = localTransformLU,
             }.Schedule();
         }
     }
@@ -46,7 +46,7 @@ namespace SimpleGun
 
         public EntityCommandBuffer Ecb;
 
-        [ReadOnly] public ComponentLookup<LocalToWorld> localTransformLU;
+        [ReadOnly] public ComponentLookup<LocalToWorld> transformLU;
 
         void Execute(ref GunData shootData)
         {
@@ -69,7 +69,7 @@ namespace SimpleGun
                             {
                                 Entity ammoEntity = Ecb.Instantiate(shootData.AmmoPrefab);
 
-                                var spawnTransform = localTransformLU.GetRefRO(shootData.SpawnPosRot).ValueRO;
+                                var spawnTransform = transformLU[shootData.SpawnPosRot];
 
                                 Ecb.SetComponent(ammoEntity, LocalTransform.FromPositionRotationScale(spawnTransform.Position, spawnTransform.Rotation, shootData.SpawnScale));
 
@@ -82,7 +82,7 @@ namespace SimpleGun
 
                                 Ecb.AddComponent(ammoEntity, ammoData);
                                 Ecb.AddComponent(ammoEntity, new AmmoInit());
-                                Ecb.AddSharedComponent(ammoEntity, new HomingGun.GunHomingData());
+                                //Ecb.AddSharedComponent(ammoEntity, new HomingGun.GunHomingData());
 
                                 shootData.CurrentAmmoCount--;
                             }

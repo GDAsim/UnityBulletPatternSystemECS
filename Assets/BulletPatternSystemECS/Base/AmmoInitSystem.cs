@@ -25,6 +25,40 @@ public partial class AmmoInitSystem : SystemBase
            .WithAll<AmmoInit>()
            .ForEach((
                Entity e,
+               ref LocalTransform localTransform, in AmmoData ammoData) =>
+           {
+               // GetNextAction();
+               switch (ammoData.Patterns[ammoData.CurrentIndex])
+               {
+                   case TransformAction action:
+                       ammoData.CurrentTransformAction = action;
+                       ammoData.CurrentActionType = ActionTypes.TransformAction;
+                       break;
+                   case TransformWithEntitiesAction action:
+                       ammoData.CurrentTransformWithEntitiesAction = action;
+                       ammoData.CurrentActionType = ActionTypes.TransformWithEntities;
+                       break;
+               }
+
+               // ReadyAction();
+               switch (ammoData.CurrentActionType)
+               {
+                   case ActionTypes.TransformAction:
+                       ammoData.CurrentTransformAction.ReadyAction(localTransform);
+                       break;
+                   case ActionTypes.TransformWithEntities:
+                       ammoData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, new LocalToWorld[] { });
+                       break;
+               }
+
+               ecb.RemoveComponent<AmmoInit>(e);
+           })
+           .WithoutBurst().Run();
+
+        Entities.WithName("AmmoInitWithHoming")
+           .WithAll<AmmoInit>()
+           .ForEach((
+               Entity e,
                ref LocalTransform localTransform, in AmmoData ammoData, in GunHomingData homingData) =>
            {
                LocalToWorld homingTransform = default;
