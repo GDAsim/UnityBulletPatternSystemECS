@@ -108,6 +108,10 @@ namespace SynchronizedGun
                             gunData.CurrentTransformAction = action;
                             gunData.CurrentActionType = ActionTypes.TransformAction;
                             break;
+                        case DelayAction action:
+                            gunData.CurrentDelayAction = action;
+                            gunData.CurrentActionType = ActionTypes.DelayAction;
+                            break;
                         case TransformWithEntitiesAction action:
                             gunData.CurrentTransformWithEntitiesAction = action;
                             gunData.CurrentActionType = ActionTypes.TransformWithEntities;
@@ -120,6 +124,9 @@ namespace SynchronizedGun
                         case ActionTypes.TransformAction:
                             gunData.CurrentTransformAction.ReadyAction(localTransform);
                             break;
+                        case ActionTypes.DelayAction:
+                            gunData.CurrentDelayAction.ReadyAction();
+                            return;
                         case ActionTypes.TransformWithEntities:
                             gunData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, entitiesTransform);
                             break;

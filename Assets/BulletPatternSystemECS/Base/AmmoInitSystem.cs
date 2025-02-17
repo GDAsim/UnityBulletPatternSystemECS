@@ -36,6 +36,10 @@ public partial class AmmoInitSystem : SystemBase
                            ammoData.CurrentTransformAction = action;
                            ammoData.CurrentActionType = ActionTypes.TransformAction;
                            break;
+                       case DelayAction action:
+                           ammoData.CurrentDelayAction = action;
+                           ammoData.CurrentActionType = ActionTypes.DelayAction;
+                           break;
                        case TransformWithEntitiesAction action:
                            ammoData.CurrentTransformWithEntitiesAction = action;
                            ammoData.CurrentActionType = ActionTypes.TransformWithEntities;
@@ -48,6 +52,9 @@ public partial class AmmoInitSystem : SystemBase
                        case ActionTypes.TransformAction:
                            ammoData.CurrentTransformAction.ReadyAction(localTransform);
                            break;
+                       case ActionTypes.DelayAction:
+                           ammoData.CurrentDelayAction.ReadyAction();
+                           return;
                        case ActionTypes.TransformWithEntities:
                            ammoData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, new LocalTransform[] { });
                            break;
@@ -82,6 +89,10 @@ public partial class AmmoInitSystem : SystemBase
                        ammoData.CurrentTransformAction = action;
                        ammoData.CurrentActionType = ActionTypes.TransformAction;
                        break;
+                   case DelayAction action:
+                       ammoData.CurrentDelayAction = action;
+                       ammoData.CurrentActionType = ActionTypes.DelayAction;
+                       break;
                    case TransformWithEntitiesAction action:
                        ammoData.CurrentTransformWithEntitiesAction = action;
                        ammoData.CurrentActionType = ActionTypes.TransformWithEntities;
@@ -94,6 +105,9 @@ public partial class AmmoInitSystem : SystemBase
                    case ActionTypes.TransformAction:
                        ammoData.CurrentTransformAction.ReadyAction(localTransform);
                        break;
+                   case ActionTypes.DelayAction:
+                       ammoData.CurrentDelayAction.ReadyAction();
+                       return;
                    case ActionTypes.TransformWithEntities:
                        ammoData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, new LocalTransform[] { homingTransform , gunTransform });
                        break;

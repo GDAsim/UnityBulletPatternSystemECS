@@ -41,7 +41,21 @@ namespace SynchronizedGun
                 }
                 else if (authoring.snycType == SyncType.BulletMoveSync)
                 {
-                    
+                    var EntityA = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
+                    AddComponentObject(EntityA, new GunSetupData
+                    {
+                        GunStats = authoring.baseStats.GetStruct(),
+                        PatternSelect = GunPatternSelect.BulletMoveSync,
+                        GunEntity = GetEntity(authoring.Gun, TransformUsageFlags.Dynamic),
+
+                        WithEntities = new Entity[]
+                        {
+                            GetEntity(authoring.Pos1, TransformUsageFlags.Dynamic),
+                            GetEntity(authoring.Pos2, TransformUsageFlags.Dynamic),
+                            GetEntity(authoring.Pos3, TransformUsageFlags.Dynamic),
+                            GetEntity(authoring.Pos4, TransformUsageFlags.Dynamic),
+                        }
+                    });
                 }
             }
         }

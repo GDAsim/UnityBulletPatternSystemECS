@@ -54,6 +54,10 @@ namespace SynchronizedGun
                                     gunData.CurrentTransformAction.DoAction(DeltaTime, ref localTransformRef.ValueRW);
                                     DoAction = gunData.CurrentActionTimer >= gunData.CurrentTransformAction.Duration;
                                     break;
+                                case ActionTypes.DelayAction:
+                                    gunData.CurrentDelayAction.DoAction();
+                                    DoAction = gunData.CurrentActionTimer >= gunData.CurrentDelayAction.Duration;
+                                    break;
                                 case ActionTypes.TransformWithEntities:
                                     gunData.CurrentTransformWithEntitiesAction.DoAction(DeltaTime, ref localTransformRef.ValueRW, entitiesTransform);
                                     DoAction = gunData.CurrentActionTimer >= gunData.CurrentTransformWithEntitiesAction.Duration;
@@ -70,6 +74,9 @@ namespace SynchronizedGun
                                     case ActionTypes.TransformAction:
                                         gunData.CurrentTransformAction.EndAction(ref localTransformRef.ValueRW);
                                         break;
+                                    case ActionTypes.DelayAction:
+                                        gunData.CurrentDelayAction.EndAction();
+                                        break;
                                     case ActionTypes.TransformWithEntities:
                                         gunData.CurrentTransformWithEntitiesAction.EndAction(ref localTransformRef.ValueRW, entitiesTransform);
                                         break;
@@ -81,6 +88,10 @@ namespace SynchronizedGun
                                     case TransformAction action:
                                         gunData.CurrentTransformAction = action;
                                         gunData.CurrentActionType = ActionTypes.TransformAction;
+                                        break;
+                                    case DelayAction action:
+                                        gunData.CurrentDelayAction = action;
+                                        gunData.CurrentActionType = ActionTypes.DelayAction;
                                         break;
                                     case TransformWithEntitiesAction action:
                                         gunData.CurrentTransformWithEntitiesAction = action;
@@ -96,6 +107,9 @@ namespace SynchronizedGun
                                     case ActionTypes.TransformAction:
                                         gunData.CurrentTransformAction.ReadyAction(localTransformRef.ValueRW);
                                         break;
+                                    case ActionTypes.DelayAction:
+                                        gunData.CurrentDelayAction.ReadyAction();
+                                        return;
                                     case ActionTypes.TransformWithEntities:
                                         gunData.CurrentTransformWithEntitiesAction.ReadyAction(localTransformRef.ValueRW, entitiesTransform);
                                         break;
@@ -169,22 +183,22 @@ namespace SynchronizedGun
                         case GunPatternSelect.ShootMoveSync:
                             return BulletPatterns.Straight(power);
                         case GunPatternSelect.BulletMoveSync:
-                            //var bulletPattern = new IAction[2]
-                            //{
-                            //    new DelayAction
-                            //    {
-                            //        DelayUntil = gunData.Has4ShootCycleEnd
-                            //    },
-                            //    new TransformAction
-                            //    {
-                            //        Duration = 9999,
-                            //        StartTime = 0,
+                            var bulletPattern = new IAction[2]
+                            {
+                                new DelayAction
+                                {
+                                    DelayUntil = gunData.Has4ShootCycleEnd
+                                },
+                                new TransformAction
+                                {
+                                    Duration = 9999,
+                                    StartTime = 0,
 
-                            //        Action = TransformAction.MoveForward,
-                            //        ActionSpeed = power,
-                            //        IsDeltaAction = true,
-                            //    },
-                            //};
+                                    Action = TransformAction.MoveForward,
+                                    ActionSpeed = power,
+                                    IsDeltaAction = true,
+                                },
+                            };
                             return BulletPatterns.Straight(power);
                         default:
                             throw new NotImplementedException();

@@ -22,6 +22,6 @@ public enum ActionTypes
 {
     TransformAction,
     TransformWithEntities,
-    //DelayAction,
-    //SplitAction
+    DelayAction,
+    SplitAction
 }

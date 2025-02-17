@@ -1,9 +1,7 @@
 namespace SynchronizedGun
 {
-    using System;
     using Unity.Entities;
     using UnityEngine;
-    using static SynchronizedGun.GunData;
 
     public class Gun : MonoBehaviour
     {
@@ -52,6 +50,7 @@ namespace SynchronizedGun
         public ActionTypes CurrentActionType;
         public TransformAction CurrentTransformAction;
         public TransformWithEntitiesAction CurrentTransformWithEntitiesAction;
+        public DelayAction CurrentDelayAction;
         public Entity[] WithEntities;
 
         public float CurrentActionTimer;
