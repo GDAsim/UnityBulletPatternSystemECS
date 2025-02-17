@@ -4,15 +4,15 @@ namespace SimpleGun
     using UnityEngine;
     using static GunData;
 
-    public class SimpleGunController : MonoBehaviour
+    public class GunController : MonoBehaviour
     {
         [SerializeField] GunStats baseStats;
         [SerializeField] Gun gun;
         [SerializeField] GunPatternSelect PatternSelect;
 
-        class Baker : Baker<SimpleGunController>
+        class Baker : Baker<GunController>
         {
-            public override void Bake(SimpleGunController authoring)
+            public override void Bake(GunController authoring)
             {
                 DependsOn(authoring.baseStats);
                 

@@ -1,10 +1,11 @@
 namespace HomingGun
 {
-    using Unity.Collections;
+    using System;
     using Unity.Entities;
     using Unity.Mathematics;
     using Unity.Transforms;
     using UnityEngine;
+    using static HomingGun.GunData;
 
     [DisableAutoCreation]
     [UpdateBefore(typeof(AmmoSystem))]
@@ -52,21 +53,9 @@ namespace HomingGun
 
                                     ecb.SetComponent(ammoEntity, LocalTransform.FromPositionRotationScale(spawnTransform.Position, spawnTransform.Rotation, shootDataRO.SpawnScale));
 
-                                    var p = new IAction[1]
-                                    {
-                                        new TransformWithEntitiesAction
-                                        {
-                                            Duration = 0.1f,
-                                            StartTime = 0,
-
-                                            Action = SimpleHoming,
-                                            ActionSpeed = shootDataRO.GunStats.Power,
-                                            IsDeltaAction = true
-                                        },
-                                    };
                                     AmmoData ammoData = new()
                                     {
-                                        Patterns = p,
+                                        Patterns = GetPattern(shootDataRO.PatternSelect, shootDataRO.GunStats.Power),
                                         CurrentIndex = 0,
                                         CurrentActionTimer = 0
                                     };
@@ -103,23 +92,89 @@ namespace HomingGun
                     }
                 }
 
-                TransformData SimpleHoming(TransformData startData, float speed, float time, LocalToWorld[] entities)
+                IAction[] GetPattern(GunPatternSelect select, float power)
                 {
-                    var hasHoming = entities.Length > 0;
-                    if (hasHoming)
+                    IAction[] bulletPattern;
+                    switch (select)
                     {
-                        var homingTransform = entities[0];
+                        case GunPatternSelect.Simple:
+                            bulletPattern = new IAction[]
+                            {
+                                new TransformWithEntitiesAction
+                                {
+                                    Duration = 0.1f,
+                                    StartTime = 0,
 
-                        var dirToPlayer = math.normalize(homingTransform.Position - startData.Position);
+                                    Action = SimpleHoming,
+                                    ActionSpeed = power,
+                                    IsDeltaAction = true
+                                },
+                            };
+                            return bulletPattern;
+                        case GunPatternSelect.DistanceProximity:
+                            bulletPattern = new IAction[]
+                            {
+                                new TransformWithEntitiesAction
+                                {
+                                    Duration = 0.1f,
+                                    StartTime = 0,
 
-                        startData.Rotation = Quaternion.RotateTowards(startData.Rotation, Quaternion.LookRotation(dirToPlayer), homingDataShared.HomingRate * (speed * time));
+                                    Action = SimpleHoming,
+                                    ActionSpeed = power,
+                                    IsDeltaAction = true
+                                },
+                            };
+                            return bulletPattern;
+                        case GunPatternSelect.LimitedProximity:
+                            bulletPattern = new IAction[]
+                            {
+                                new TransformWithEntitiesAction
+                                {
+                                    Duration = 0.1f,
+                                    StartTime = 0,
+
+                                    Action = SimpleHoming,
+                                    ActionSpeed = power,
+                                    IsDeltaAction = true
+                                },
+                            };
+                            return bulletPattern;
+                        case GunPatternSelect.Accelerated:
+                            bulletPattern = new IAction[]
+                            {
+                                new TransformWithEntitiesAction
+                                {
+                                    Duration = 0.1f,
+                                    StartTime = 0,
+
+                                    Action = SimpleHoming,
+                                    ActionSpeed = power,
+                                    IsDeltaAction = true
+                                },
+                            };
+                            return bulletPattern;
+                        default:
+                            throw new NotImplementedException();
                     }
 
-                    float3 forward = math.mul(startData.Rotation, Vector3.forward) * (speed * time);
+                    TransformData SimpleHoming(TransformData startData, float speed, float time, LocalToWorld[] entities)
+                    {
+                        var hasHoming = entities.Length > 0;
+                        if (hasHoming)
+                        {
+                            var homingTransform = entities[0];
 
-                    startData.Position = startData.Position + forward;
+                            var dirToPlayer = math.normalize(homingTransform.Position - startData.Position);
 
-                    return startData;
+                            startData.Rotation = Quaternion.RotateTowards(startData.Rotation, Quaternion.LookRotation(dirToPlayer), homingDataShared.HomingRate * (speed * time));
+                        }
+
+                        float3 forward = math.mul(startData.Rotation, Vector3.forward) * (speed * time);
+
+                        startData.Position = startData.Position + forward;
+
+                        return startData;
+                    }
                 }
             }
         }

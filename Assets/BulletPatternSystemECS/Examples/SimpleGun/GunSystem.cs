@@ -1,8 +1,11 @@
 namespace SimpleGun
 {
+    using System;
     using Unity.Collections;
     using Unity.Entities;
     using Unity.Transforms;
+    using UnityEngine;
+    using static SimpleGun.GunData;
 
     [DisableAutoCreation]
     public partial struct GunSystem : ISystem
@@ -75,14 +78,13 @@ namespace SimpleGun
 
                                 AmmoData ammoData = new()
                                 {
-                                    Patterns = Gun.GetPattern(shootData.PatternSelect, shootData.GunStats.Power),
+                                    Patterns = GetPattern(shootData.PatternSelect, shootData.GunStats.Power),
                                     CurrentIndex = 0,
                                     CurrentActionTimer = 0
                                 };
 
                                 Ecb.AddComponent(ammoEntity, ammoData);
                                 Ecb.AddComponent(ammoEntity, new AmmoInit());
-                                //Ecb.AddSharedComponent(ammoEntity, new HomingGun.GunHomingData());
 
                                 shootData.CurrentAmmoCount--;
                             }
@@ -109,6 +111,19 @@ namespace SimpleGun
                             }
                         }
                     }
+                }
+            }
+
+            IAction[] GetPattern(GunPatternSelect select, float power)
+            {
+                switch (select)
+                {
+                    case GunPatternSelect.Straight:
+                        return BulletPatterns.Straight(power);
+                    case GunPatternSelect.Sine:
+                        return BulletPatterns.Sine(power, Vector3.left, 1f);
+                    default:
+                        throw new NotImplementedException();
                 }
             }
         }

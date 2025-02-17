@@ -28,13 +28,16 @@ public struct TransformData
     }
 
 
+
+
+
     public static TransformData operator -(TransformData left, TransformData right)
     {
         return new TransformData
         {
             Position = left.Position - right.Position,
             Rotation = math.mul(left.Rotation, math.inverse(right.Rotation)),
-            Scale = left.Scale
+            Scale = left.Scale - right.Scale
         };
     }
     public static TransformData operator +(TransformData left, TransformData right)

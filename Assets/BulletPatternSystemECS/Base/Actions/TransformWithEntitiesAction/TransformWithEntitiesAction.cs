@@ -30,10 +30,6 @@ public partial struct TransformWithEntitiesAction : IAction
     /// </summary>
     public void ReadyAction(LocalTransform transform, LocalToWorld[] entities)
     {
-        if(transform.Position.x == float.NaN)
-        {
-
-        }
         startData = new(transform);
 
         timer = StartTime;

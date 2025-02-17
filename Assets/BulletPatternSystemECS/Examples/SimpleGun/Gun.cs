@@ -37,19 +37,6 @@ namespace SimpleGun
                 SetComponentEnabled<GunData>(baseEntity, false);
             }
         }
-
-        public static IAction[] GetPattern(GunPatternSelect select, float power)
-        {
-            switch (select)
-            {
-                case GunPatternSelect.Straight:
-                    return BulletPatterns.Straight(power);
-                case GunPatternSelect.Sine:
-                    return BulletPatterns.Sine(power, Vector3.left, 1f);
-                default:
-                    throw new NotImplementedException();
-            }
-        }
     }
 
     public struct GunData : IComponentData, IEnableableComponent

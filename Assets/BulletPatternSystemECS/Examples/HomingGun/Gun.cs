@@ -38,50 +38,6 @@ namespace HomingGun
                 SetComponentEnabled<GunData>(baseEntity, false);
             }
         }
-        public static IAction[] GetPattern(GunPatternSelect select, float power)
-        {
-            IAction[] bulletPattern;
-            switch (select)
-            {
-                case GunPatternSelect.Simple:
-                    bulletPattern = new IAction[1]
-                    {
-                        new TransformAction
-                        {
-                            Duration = 0.1f,
-                            StartTime = 0,
-
-                            Action = null,
-                            ActionSpeed = power,
-                            IsDeltaAction = true
-                        },
-                    };
-
-                    return bulletPattern;
-                case GunPatternSelect.DistanceProximity:
-                    bulletPattern = new IAction[1]
-                    {
-                        new TransformAction
-                        {
-                            Duration = 0.1f,
-                            StartTime = 0,
-
-                            Action = null,
-                            ActionSpeed = power,
-                            IsDeltaAction = true
-                        },
-                    };
-
-                    return bulletPattern;
-                case GunPatternSelect.LimitedProximity:
-                    return BulletPatterns.Straight(power);
-                case GunPatternSelect.Accelerated:
-                    return BulletPatterns.Straight(power);
-                default:
-                    throw new NotImplementedException();
-            }
-        }
-        
     }
 
     public struct GunData : IComponentData, IEnableableComponent
