@@ -486,7 +486,7 @@ GameObject:
   - component: {fileID: 3323316680233894852}
   - component: {fileID: 5067033990588423961}
   m_Layer: 0
-  m_Name: Synchronized
+  m_Name: Synchronized (Shoot Move)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -505,9 +505,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   baseStats: {fileID: 11400000, guid: f82c56050d02d5b42a8330713a1429cd, type: 2}
-  shootmode: 0
-  RightGun: {fileID: 0}
-  LeftGun: {fileID: 745246413}
+  snycType: 0
+  Gun: {fileID: 0}
+  Pos1: {fileID: 0}
+  Pos2: {fileID: 0}
+  Pos3: {fileID: 0}
+  Pos4: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

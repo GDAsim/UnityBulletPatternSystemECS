@@ -7,79 +7,35 @@ namespace SynchronizedGun
     public class GunController : MonoBehaviour
     {
         [SerializeField] GunStats baseStats;
-        [SerializeField] ShootMode shootmode = ShootMode.Cycle;
+        [SerializeField] SyncType snycType;
 
-        [SerializeField] Gun RightGun;
-        [SerializeField] Gun LeftGun;
+        [SerializeField] Gun Gun;
 
-        enum ShootMode { Normal, Cycle, Helix }
+        [SerializeField] Transform Pos1;
+        [SerializeField] Transform Pos2;
+        [SerializeField] Transform Pos3;
+        [SerializeField] Transform Pos4;
 
+        enum SyncType { ShootMoveSync, BulletMoveSync }
         class Baker : Baker<GunController>
         {
             public override void Bake(GunController authoring)
             {
                 DependsOn(authoring.baseStats);
 
-                if (authoring.shootmode == ShootMode.Normal)
+                if (authoring.snycType == SyncType.ShootMoveSync)
                 {
                     var EntityA = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
                     AddComponent(EntityA, new GunSetupData
                     {
                         GunStats = authoring.baseStats.GetStruct(),
-                        PatternSelect = GunPatternSelect.Straight,
-                        GunEntity = GetEntity(authoring.RightGun, TransformUsageFlags.Dynamic),
-                    });
-
-                    var EntityB = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
-                    AddComponent(EntityB, new GunSetupData
-                    {
-                        GunStats = authoring.baseStats.GetStruct(),
-                        PatternSelect = GunPatternSelect.Straight,
-                        GunEntity = GetEntity(authoring.LeftGun, TransformUsageFlags.Dynamic),
+                        PatternSelect = GunPatternSelect.ShootMoveSync,
+                        GunEntity = GetEntity(authoring.Gun, TransformUsageFlags.Dynamic),
                     });
                 }
-                else if (authoring.shootmode == ShootMode.Cycle)
+                else if (authoring.snycType == SyncType.BulletMoveSync)
                 {
-                    var stats = authoring.baseStats.GetStruct();
-                    stats.ShootDelay *= 2;
-
-                    var EntityA = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
-                    AddComponent(EntityA, new GunSetupData
-                    {
-                        GunStats = stats,
-                        PatternSelect = GunPatternSelect.Straight,
-                        GunEntity = GetEntity(authoring.RightGun, TransformUsageFlags.Dynamic),
-                    });
-
-                    stats.StartShootDelay = 1;
-
-                    var EntityB = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
-                    AddComponent(EntityB, new GunSetupData
-                    {
-                        GunStats = stats,
-                        PatternSelect = GunPatternSelect.Straight,
-                        GunEntity = GetEntity(authoring.LeftGun, TransformUsageFlags.Dynamic),
-                    });
-                }
-                else if (authoring.shootmode == ShootMode.Helix)
-                {
-                    var stats = authoring.baseStats.GetStruct();
-
-                    var EntityA = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
-                    AddComponent(EntityA, new GunSetupData
-                    {
-                        GunStats = stats,
-                        PatternSelect = GunPatternSelect.SineRight,
-                        GunEntity = GetEntity(authoring.RightGun, TransformUsageFlags.Dynamic),
-                    });
-
-                    var EntityB = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
-                    AddComponent(EntityB, new GunSetupData
-                    {
-                        GunStats = stats,
-                        PatternSelect = GunPatternSelect.SineLeft,
-                        GunEntity = GetEntity(authoring.LeftGun, TransformUsageFlags.Dynamic),
-                    });
+                    
                 }
             }
         }

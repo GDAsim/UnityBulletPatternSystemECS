@@ -1,5 +1,6 @@
 namespace HomingGun
 {
+    using System;
     using Unity.Burst;
     using Unity.Entities;
     using UnityEngine;
@@ -34,41 +35,47 @@ namespace HomingGun
             {
                 DependsOn(authoring.baseStats);
 
-                if (authoring.shootmode == HomingType.Simple)
+                GunPatternSelect PatternSelect;
+                switch (authoring.shootmode)
                 {
-                    var EntityA = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
-                    AddComponent(EntityA, new GunSetupData
+                    case HomingType.Simple:
+                        PatternSelect = GunPatternSelect.Simple;
+                        break;
+                    case HomingType.DistanceProximity:
+                        PatternSelect = GunPatternSelect.DistanceProximity;
+                        break;
+                    case HomingType.LimitedProximity:
+                        PatternSelect = GunPatternSelect.LimitedProximity;
+                        break;
+                    case HomingType.Accelerated:
+                        PatternSelect = GunPatternSelect.Accelerated;
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
+
+                var EntityA = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
+                var gunEntity = GetEntity(authoring.Gun, TransformUsageFlags.Dynamic);
+                AddComponent(EntityA, new GunSetupData
+                {
+                    GunStats = authoring.baseStats.GetStruct(),
+                    PatternSelect = PatternSelect,
+                    GunEntity = gunEntity,
+
+                    GunHomingData = new GunHomingData()
                     {
-                        GunStats = authoring.baseStats.GetStruct(),
-                        PatternSelect = GunPatternSelect.Simple,
-                        GunEntity = GetEntity(authoring.Gun, TransformUsageFlags.Dynamic),
+                        HomingEntity = GetEntity(authoring.HomingTarget, TransformUsageFlags.Dynamic),
+                        HomingRate = authoring.HomingRate,
 
-                        GunHomingData = new GunHomingData()
-                        {
-                            HomingEntity = GetEntity(authoring.HomingTarget, TransformUsageFlags.Dynamic),
-                            HomingRate = authoring.HomingRate,
+                        ProximityDistance = authoring.ProximityDistance,
 
-                            ProximityDistance = authoring.ProximityDistance,
+                        LimitedProximityFactor = authoring.LimitedProximityFactor,
+                        GunEntity = gunEntity,
 
-                            LimitedProximityFactor = authoring.LimitedProximityFactor,
-
-                            AcceleratedRadius = authoring.AcceleratedRadius,
-                            AccelerationMulti = authoring.AccelerationMulti,
-                        }
-                    });
-                }
-                else if (authoring.shootmode == HomingType.DistanceProximity)
-                {
-                    
-                }
-                else if (authoring.shootmode == HomingType.LimitedProximity)
-                {
-                    
-                }
-                else if (authoring.shootmode == HomingType.Accelerated)
-                {
-
-                }
+                        AcceleratedRadius = authoring.AcceleratedRadius,
+                        AccelerationMulti = authoring.AccelerationMulti,
+                    }
+                });
             }
         }
     }

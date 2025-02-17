@@ -1,10 +1,8 @@
 namespace HomingGun
 {
-    using System;
     using Unity.Burst;
     using Unity.Entities;
     using UnityEngine;
-    using static HomingGun.GunData;
 
     public class Gun : MonoBehaviour
     {
@@ -87,6 +85,7 @@ namespace HomingGun
         public float ProximityDistance;
 
         [Header("Limited Proximity Properties")]
+        public Entity GunEntity;
         public float LimitedProximityFactor;
 
         [Header("Accelerated Properties")]

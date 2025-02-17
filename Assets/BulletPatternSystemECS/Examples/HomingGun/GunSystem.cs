@@ -119,7 +119,7 @@ namespace HomingGun
                                     Duration = 0.1f,
                                     StartTime = 0,
 
-                                    Action = SimpleHoming,
+                                    Action = DistanceProximityHoming,
                                     ActionSpeed = power,
                                     IsDeltaAction = true
                                 },
@@ -133,7 +133,7 @@ namespace HomingGun
                                     Duration = 0.1f,
                                     StartTime = 0,
 
-                                    Action = SimpleHoming,
+                                    Action = LimitedProximityHoming,
                                     ActionSpeed = power,
                                     IsDeltaAction = true
                                 },
@@ -147,7 +147,7 @@ namespace HomingGun
                                     Duration = 0.1f,
                                     StartTime = 0,
 
-                                    Action = SimpleHoming,
+                                    Action = AcceleratedHoming,
                                     ActionSpeed = power,
                                     IsDeltaAction = true
                                 },
@@ -167,6 +167,77 @@ namespace HomingGun
                             var dirToPlayer = math.normalize(homingTransform.Position - startData.Position);
 
                             startData.Rotation = Quaternion.RotateTowards(startData.Rotation, Quaternion.LookRotation(dirToPlayer), homingDataShared.HomingRate * (speed * time));
+                        }
+
+                        float3 forward = math.mul(startData.Rotation, Vector3.forward) * (speed * time);
+
+                        startData.Position = startData.Position + forward;
+
+                        return startData;
+                    }
+
+                    TransformData DistanceProximityHoming(TransformData startData, float speed, float time, LocalToWorld[] entities)
+                    {
+                        var hasHoming = entities.Length > 0;
+                        if (hasHoming)
+                        {
+                            var homingTransform = entities[0];
+
+                            bool targetInRange = Vector3.Distance(startData.Position, homingTransform.Position) <= homingDataShared.ProximityDistance;
+
+                            if (targetInRange)
+                            {
+                                var dirToPlayer = math.normalize(homingTransform.Position - startData.Position);
+
+                                startData.Rotation = Quaternion.RotateTowards(startData.Rotation, Quaternion.LookRotation(dirToPlayer), homingDataShared.HomingRate * (speed * time));
+                            }
+                        }
+
+                        float3 forward = math.mul(startData.Rotation, Vector3.forward) * (speed * time);
+
+                        startData.Position = startData.Position + forward;
+
+                        return startData;
+                    }
+
+                    TransformData LimitedProximityHoming(TransformData startData, float speed, float time, LocalToWorld[] entities)
+                    {
+                        var hasHoming = entities.Length > 0;
+                        if (hasHoming)
+                        {
+                            var homingTransform = entities[0];
+                            var gunTransform = entities[1];
+
+                            var dirToPlayer = math.normalize(homingTransform.Position - startData.Position);
+
+                            bool targetInRange = Quaternion.Angle(gunTransform.Rotation, Quaternion.LookRotation(dirToPlayer)) <= homingDataShared.HomingRate * homingDataShared.LimitedProximityFactor;
+
+                            if (targetInRange)
+                            {
+                                startData.Rotation = Quaternion.RotateTowards(startData.Rotation, Quaternion.LookRotation(dirToPlayer), homingDataShared.HomingRate * (speed * time));
+                            }
+                        }
+
+                        float3 forward = math.mul(startData.Rotation, Vector3.forward) * (speed * time);
+
+                        startData.Position = startData.Position + forward;
+
+                        return startData;
+                    }
+
+                    TransformData AcceleratedHoming(TransformData startData, float speed, float time, LocalToWorld[] entities)
+                    {
+                        var hasHoming = entities.Length > 0;
+                        if (hasHoming)
+                        {
+                            var homingTransform = entities[0];
+
+                            var dirToPlayer = math.normalize(homingTransform.Position - startData.Position);
+
+                            startData.Rotation = Quaternion.RotateTowards(startData.Rotation, Quaternion.LookRotation(dirToPlayer), homingDataShared.HomingRate * (speed * time));
+
+                            // Linear Acceleration growth based on distance
+                            speed = speed * Mathf.Clamp(homingDataShared.AcceleratedRadius / Vector3.Distance(startData.Position, homingTransform.Position), 1, homingDataShared.AccelerationMulti);
                         }
 
                         float3 forward = math.mul(startData.Rotation, Vector3.forward) * (speed * time);

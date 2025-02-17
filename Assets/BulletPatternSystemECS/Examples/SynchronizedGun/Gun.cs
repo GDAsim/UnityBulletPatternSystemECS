@@ -41,12 +41,10 @@ namespace SynchronizedGun
         {
             switch (select)
             {
-                case GunPatternSelect.Straight:
+                case GunPatternSelect.ShootMoveSync:
                     return BulletPatterns.Straight(power);
-                case GunPatternSelect.SineRight:
-                    return BulletPatterns.Sine(power, Vector3.right, 0.2f);
-                case GunPatternSelect.SineLeft:
-                    return BulletPatterns.Sine(power, Vector3.left, 0.2f);
+                case GunPatternSelect.BulletMoveSync:
+                    return BulletPatterns.Straight(power);
                 default:
                     throw new NotImplementedException();
             }
@@ -82,9 +80,8 @@ namespace SynchronizedGun
 
         public enum GunPatternSelect
         {
-            Straight,
-            SineLeft,
-            SineRight
+            ShootMoveSync, 
+            BulletMoveSync
         }
     }
 }

@@ -106,7 +106,12 @@ public partial class AmmoSystem : SystemBase
                 LocalToWorld homingTransform = default;
                 if (localTransformLU.HasComponent(homingData.HomingEntity))
                 {
-                    homingTransform = localTransformLU.GetRefRO(homingData.HomingEntity).ValueRO;
+                    homingTransform = localTransformLU[homingData.HomingEntity];
+                }
+                LocalToWorld gunTransform = default;
+                if (localTransformLU.HasComponent(homingData.GunEntity))
+                {
+                    gunTransform = localTransformLU[homingData.GunEntity];
                 }
 
                 ammoData.CurrentActionTimer += DeltaTime;
@@ -120,7 +125,7 @@ public partial class AmmoSystem : SystemBase
                         DoAction = ammoData.CurrentActionTimer >= ammoData.CurrentTransformAction.Duration;
                         break;
                     case ActionTypes.TransformWithEntities:
-                        ammoData.CurrentTransformWithEntitiesAction.DoAction(DeltaTime, ref localTransform, new LocalToWorld[] { homingTransform });
+                        ammoData.CurrentTransformWithEntitiesAction.DoAction(DeltaTime, ref localTransform, new LocalToWorld[] { homingTransform, gunTransform });
                         DoAction = ammoData.CurrentActionTimer >= ammoData.CurrentTransformWithEntitiesAction.Duration;
                         break;
                     default:
@@ -136,7 +141,7 @@ public partial class AmmoSystem : SystemBase
                             ammoData.CurrentTransformAction.EndAction(ref localTransform);
                             break;
                         case ActionTypes.TransformWithEntities:
-                            ammoData.CurrentTransformWithEntitiesAction.EndAction(ref localTransform, new LocalToWorld[] { homingTransform });
+                            ammoData.CurrentTransformWithEntitiesAction.EndAction(ref localTransform, new LocalToWorld[] { homingTransform, gunTransform });
                             break;
                     }
 
@@ -162,7 +167,7 @@ public partial class AmmoSystem : SystemBase
                             ammoData.CurrentTransformAction.ReadyAction(localTransform);
                             break;
                         case ActionTypes.TransformWithEntities:
-                            ammoData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, new LocalToWorld[] { homingTransform });
+                            ammoData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, new LocalToWorld[] { homingTransform , gunTransform });
                             break;
                     }
 
