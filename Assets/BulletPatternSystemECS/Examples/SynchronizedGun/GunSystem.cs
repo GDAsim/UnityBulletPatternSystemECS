@@ -75,7 +75,7 @@ namespace SynchronizedGun
 
                                 AmmoData ammoData = new()
                                 {
-                                    Patterns = Gun.GetPattern(shootData.PatternSelect, shootData.GunStats.Power),
+                                    Patterns = Gun.GetBulletPattern(shootData.PatternSelect, shootData.GunStats.Power),
                                     CurrentIndex = 0,
                                     CurrentActionTimer = 0
                                 };

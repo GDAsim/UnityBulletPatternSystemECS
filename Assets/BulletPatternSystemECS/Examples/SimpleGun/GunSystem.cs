@@ -78,7 +78,7 @@ namespace SimpleGun
 
                                 AmmoData ammoData = new()
                                 {
-                                    Patterns = GetPattern(shootData.PatternSelect, shootData.GunStats.Power),
+                                    Patterns = GetBulletPattern(shootData.PatternSelect, shootData.GunStats.Power),
                                     CurrentIndex = 0,
                                     CurrentActionTimer = 0
                                 };
@@ -114,7 +114,7 @@ namespace SimpleGun
                 }
             }
 
-            IAction[] GetPattern(GunPatternSelect select, float power)
+            IAction[] GetBulletPattern(GunPatternSelect select, float power)
             {
                 switch (select)
                 {

@@ -37,7 +37,7 @@ namespace TwinGun
                 SetComponentEnabled<GunData>(baseEntity, false);
             }
         }
-        public static IAction[] GetPattern(GunPatternSelect select, float power)
+        public static IAction[] GetBulletPattern(GunPatternSelect select, float power)
         {
             switch (select)
             {

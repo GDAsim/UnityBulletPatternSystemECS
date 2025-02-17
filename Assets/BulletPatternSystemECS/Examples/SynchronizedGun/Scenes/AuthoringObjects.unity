@@ -192,10 +192,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 745246411}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a9b1081e5800ed4bb9c284fe9dec518, type: 3}
+  m_Script: {fileID: 11500000, guid: 0d0fa3464d5538b4782d93761f8b3783, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AmmoPrefab: {fileID: 8295264336154564726, guid: 3d5704ab750531345b6877de104ed0f8, type: 3}
+  AmmoPrefab: {fileID: 8295264336154564726, guid: 801cfe27d30b608429ac8982968faba7, type: 3}
   CustomFirePos: {fileID: 0}
 --- !u!1 &827726456
 GameObject:
@@ -504,13 +504,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91ac2082fef7643439d2b07c98ab1bc2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseStats: {fileID: 11400000, guid: f82c56050d02d5b42a8330713a1429cd, type: 2}
+  baseStats: {fileID: 11400000, guid: 701e3767b0e366e4db990ed509bf3a67, type: 2}
   snycType: 0
-  Gun: {fileID: 0}
-  Pos1: {fileID: 0}
-  Pos2: {fileID: 0}
-  Pos3: {fileID: 0}
-  Pos4: {fileID: 0}
+  Gun: {fileID: 745246413}
+  Pos1: {fileID: 1446505062}
+  Pos2: {fileID: 1227516777}
+  Pos3: {fileID: 85112170}
+  Pos4: {fileID: 1665518702}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

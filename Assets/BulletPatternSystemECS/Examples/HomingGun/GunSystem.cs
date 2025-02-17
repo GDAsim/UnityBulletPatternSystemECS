@@ -55,7 +55,7 @@ namespace HomingGun
 
                                     AmmoData ammoData = new()
                                     {
-                                        Patterns = GetPattern(shootDataRO.PatternSelect, shootDataRO.GunStats.Power),
+                                        Patterns = GetBulletPattern(shootDataRO.PatternSelect, shootDataRO.GunStats.Power),
                                         CurrentIndex = 0,
                                         CurrentActionTimer = 0
                                     };
@@ -92,7 +92,7 @@ namespace HomingGun
                     }
                 }
 
-                IAction[] GetPattern(GunPatternSelect select, float power)
+                IAction[] GetBulletPattern(GunPatternSelect select, float power)
                 {
                     IAction[] bulletPattern;
                     switch (select)
