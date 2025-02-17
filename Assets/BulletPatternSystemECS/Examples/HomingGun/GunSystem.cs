@@ -110,15 +110,12 @@ namespace HomingGun
                     {
                         var homingTransform = entities[0];
 
-                        var pos = homingTransform.Position;
-                        var posVector = new Vector3(pos.x, pos.y, pos.z);
-
-                        var dirToPlayer = (posVector - startData.Position).normalized;
+                        var dirToPlayer = math.normalize(homingTransform.Position - startData.Position);
 
                         startData.Rotation = Quaternion.RotateTowards(startData.Rotation, Quaternion.LookRotation(dirToPlayer), homingDataShared.HomingRate * (speed * time));
                     }
 
-                    Vector3 forward = startData.Rotation * Vector3.forward * (speed * time);
+                    float3 forward = math.mul(startData.Rotation, Vector3.forward) * (speed * time);
 
                     startData.Position = startData.Position + forward;
 

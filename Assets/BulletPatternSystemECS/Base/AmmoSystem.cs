@@ -22,76 +22,76 @@ public partial class AmmoSystem : SystemBase
 
         var DeltaTime = SystemAPI.Time.DeltaTime;
 
-        Entities.WithName("AmmoUpdate")
-            .ForEach((
-                ref LocalTransform localTransform, in AmmoData ammoData) =>
-            {
-                if (ammoData.Patterns == null || ammoData.Patterns.Length == 0)
-                {
-                    return;
-                }
+        //Entities.WithName("AmmoUpdate")
+        //    .ForEach((
+        //        ref LocalTransform localTransform, in AmmoData ammoData) =>
+        //    {
+        //        if (ammoData.Patterns == null || ammoData.Patterns.Length == 0)
+        //        {
+        //            return;
+        //        }
 
-                ammoData.CurrentActionTimer += DeltaTime;
+        //        ammoData.CurrentActionTimer += DeltaTime;
 
-                // DoAction
-                bool DoAction;
-                switch (ammoData.CurrentActionType)
-                {
-                    case ActionTypes.TransformAction:
-                        ammoData.CurrentTransformAction.DoAction(DeltaTime, ref localTransform);
-                        DoAction = ammoData.CurrentActionTimer >= ammoData.CurrentTransformAction.Duration;
-                        break;
-                    case ActionTypes.TransformWithEntities:
-                        ammoData.CurrentTransformWithEntitiesAction.DoAction(DeltaTime, ref localTransform, new LocalToWorld[] { });
-                        DoAction = ammoData.CurrentActionTimer >= ammoData.CurrentTransformWithEntitiesAction.Duration;
-                        break;
-                    default:
-                        throw new System.Exception("Not Implemented");
-                }
+        //        // DoAction
+        //        bool DoAction;
+        //        switch (ammoData.CurrentActionType)
+        //        {
+        //            case ActionTypes.TransformAction:
+        //                ammoData.CurrentTransformAction.DoAction(DeltaTime, ref localTransform);
+        //                DoAction = ammoData.CurrentActionTimer >= ammoData.CurrentTransformAction.Duration;
+        //                break;
+        //            case ActionTypes.TransformWithEntities:
+        //                ammoData.CurrentTransformWithEntitiesAction.DoAction(DeltaTime, ref localTransform, new LocalToWorld[] { });
+        //                DoAction = ammoData.CurrentActionTimer >= ammoData.CurrentTransformWithEntitiesAction.Duration;
+        //                break;
+        //            default:
+        //                throw new System.Exception("Not Implemented");
+        //        }
 
-                if (DoAction)
-                {
-                    // EndAction();
-                    switch (ammoData.CurrentActionType)
-                    {
-                        case ActionTypes.TransformAction:
-                            ammoData.CurrentTransformAction.EndAction(ref localTransform);
-                            break;
-                        case ActionTypes.TransformWithEntities:
-                            ammoData.CurrentTransformWithEntitiesAction.EndAction(ref localTransform, new LocalToWorld[] { });
-                            break;
-                    }
+        //        if (DoAction)
+        //        {
+        //            // EndAction();
+        //            switch (ammoData.CurrentActionType)
+        //            {
+        //                case ActionTypes.TransformAction:
+        //                    ammoData.CurrentTransformAction.EndAction(ref localTransform);
+        //                    break;
+        //                case ActionTypes.TransformWithEntities:
+        //                    ammoData.CurrentTransformWithEntitiesAction.EndAction(ref localTransform, new LocalToWorld[] { });
+        //                    break;
+        //            }
 
-                    // GetNextAction();
-                    switch (ammoData.Patterns[ammoData.CurrentIndex])
-                    {
-                        case TransformAction action:
-                            ammoData.CurrentTransformAction = action;
-                            ammoData.CurrentActionType = ActionTypes.TransformAction;
-                            break;
-                        case TransformWithEntitiesAction action:
-                            ammoData.CurrentTransformWithEntitiesAction = action;
-                            ammoData.CurrentActionType = ActionTypes.TransformWithEntities;
-                            break;
-                    }
+        //            // GetNextAction();
+        //            switch (ammoData.Patterns[ammoData.CurrentIndex])
+        //            {
+        //                case TransformAction action:
+        //                    ammoData.CurrentTransformAction = action;
+        //                    ammoData.CurrentActionType = ActionTypes.TransformAction;
+        //                    break;
+        //                case TransformWithEntitiesAction action:
+        //                    ammoData.CurrentTransformWithEntitiesAction = action;
+        //                    ammoData.CurrentActionType = ActionTypes.TransformWithEntities;
+        //                    break;
+        //            }
 
-                    if (++ammoData.CurrentIndex == ammoData.Patterns.Length) ammoData.CurrentIndex = 0;
+        //            if (++ammoData.CurrentIndex == ammoData.Patterns.Length) ammoData.CurrentIndex = 0;
 
-                    // ReadyAction();
-                    switch (ammoData.CurrentActionType)
-                    {
-                        case ActionTypes.TransformAction:
-                            ammoData.CurrentTransformAction.ReadyAction(localTransform);
-                            break;
-                        case ActionTypes.TransformWithEntities:
-                            ammoData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, new LocalToWorld[] { });
-                            break;
-                    }
+        //            // ReadyAction();
+        //            switch (ammoData.CurrentActionType)
+        //            {
+        //                case ActionTypes.TransformAction:
+        //                    ammoData.CurrentTransformAction.ReadyAction(localTransform);
+        //                    break;
+        //                case ActionTypes.TransformWithEntities:
+        //                    ammoData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, new LocalToWorld[] { });
+        //                    break;
+        //            }
 
-                    ammoData.CurrentActionTimer = 0;
-                }
-            })
-            .WithoutBurst().Run();
+        //            ammoData.CurrentActionTimer = 0;
+        //        }
+        //    })
+        //    .WithoutBurst().Run();
 
         Entities.WithName("AmmoUpdateWithHoming")
             .ForEach((

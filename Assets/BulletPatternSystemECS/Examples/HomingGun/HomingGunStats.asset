@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: HomingGunStats
   m_EditorClassIdentifier: 
   MagazineCount: 0
-  MagazineCapacity: 1232132
+  MagazineCapacity: 1
   ReloadDelay: 0
   ShootDelay: 1
   Power: 5

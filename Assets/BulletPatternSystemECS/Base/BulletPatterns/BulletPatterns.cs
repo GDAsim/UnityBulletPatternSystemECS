@@ -1,4 +1,5 @@
 using System;
+using Unity.Mathematics;
 using UnityEngine;
 
 /// <summary>
@@ -37,8 +38,8 @@ public static class BulletPatterns
 
         TransformData SineMove(TransformData startData, float speed, float time)
         {
-            var SineUpDown = axis * Mathf.Sin(time) * height * speed;
-            var forward = startData.Rotation * Vector3.forward * (speed * time);
+            float3 SineUpDown = axis * Mathf.Sin(time) * height * speed;
+            var forward = math.mul(startData.Rotation, Vector3.forward) * (speed * time);
 
             startData.Position = startData.Position + forward + SineUpDown;
 
