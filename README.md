@@ -1,11 +1,20 @@
-# Bullet Shoot System
----
-### Normal Version: https://github.com/GDAsim/UnityBulletPatternSystem
-### ECS Version: https://github.com/GDAsim/UnityBulletPatternSystemECS
----
-Bullet Pattern System done using Script Defined Sequential Action
+# Bullet Shoot System (ECS)
+ECS Version of [Bullet Pattern System done using Script Defined Sequential Action](https://github.com/GDAsim/UnityBulletPatternSystem)
 
-Able to achive all types of Bullet Patterns.
+Implementation Milestones:
+- [x] Basic Bullet Movement Action
+- [x] Homing Bullet Movement Action
+- [x] Multi Gun Controller System
+- [X] Gun Preshoot Action
+- [ ] Bullet Sync Move (Delay Action)
+-   Unable to implement due to architecture
+- [ ] Teleport Bullet Movement (Instant Action, Delta Movement Action)
+- [ ] Bullet Spawn Bullets (Split Action)
+
+
+---
+
+### Info
 
 Implementation Milestones:
 Level 1: Spawn & Move
