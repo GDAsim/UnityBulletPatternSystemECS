@@ -8,89 +8,189 @@ namespace HomingGun
     using static HomingGun.GunData;
 
     [DisableAutoCreation]
-    [UpdateBefore(typeof(AmmoSystem))]
-    public partial struct GunSystem : ISystem
+    public partial class GunSystem : SystemBase
     {
-        ComponentLookup<LocalToWorld> localTransformLU;
-        public void OnCreate(ref SystemState state)
+        ComponentLookup<LocalTransform> localTransformLU;
+        ComponentLookup<LocalToWorld> transformLU;
+
+        protected override void OnCreate()
         {
-            localTransformLU = state.GetComponentLookup<LocalToWorld>(true);
+            localTransformLU = GetComponentLookup<LocalTransform>(true);
+            transformLU = GetComponentLookup<LocalToWorld>(true);
         }
-        public void OnDestroy(ref SystemState state) { }
-        public void OnUpdate(ref SystemState state)
+        protected override void OnDestroy() { }
+        protected override void OnUpdate()
         {
             var ecbSingleton = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
-            EntityCommandBuffer ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
 
-            localTransformLU.Update(ref state);
+            EntityCommandBuffer ecb = ecbSingleton.CreateCommandBuffer(EntityManager.WorldUnmanaged);
+
+            localTransformLU.Update(this);
+            transformLU.Update(this);
 
             var DeltaTime = SystemAPI.Time.DeltaTime;
 
-            foreach ((var shootDataRef, var homingDataShared) in SystemAPI.Query<RefRW<GunData>, HomingData>())
+            foreach ((var localTransformRef, var gunData, var homingDataShared, var gunEntity) in SystemAPI.Query<RefRW<LocalTransform>, GunData, HomingData>().WithEntityAccess())
             {
-                var shootDataRO = shootDataRef.ValueRO;
+                bool HaveAmmo = gunData.CurrentAmmoCount > 0;
+                bool HaveMag = gunData.CurrentMagazineCount > 0;
 
-                bool HaveAmmo = shootDataRO.CurrentAmmoCount > 0;
-                bool HaveMag = shootDataRO.CurrentMagazineCount > 0;
+                PreShootAction();
 
-                // Update()
+                gunData.ShootTimer += DeltaTime;
+
+                if (HaveAmmo)
                 {
-                    shootDataRef.ValueRW.ShootTimer += DeltaTime;
-
-                    if (HaveAmmo)
+                    AttemptShoot();
+                }
+                else
+                {
+                    if (HaveMag)
                     {
-                        // AttemptShoot()
+                        AttemptReload();
+                    }
+                }
+
+                void PreShootAction()
+                {
+                    if (gunData.Patterns == null || gunData.Patterns.Length == 0) return;
+
+                    LocalTransform[] entitiesTransform = new LocalTransform[gunData.WithEntities.Length];
+                    for (int i = 0; i < entitiesTransform.Length; i++)
+                    {
+                        entitiesTransform[i] = localTransformLU[gunData.WithEntities[i]];
+                    }
+
+                    gunData.CurrentActionTimer += DeltaTime;
+
+                    if (DoAction())
+                    {
+                        EndAction();
+
+                        GetNextAction();
+
+                        ReadyAction();
+
+                        gunData.CurrentActionTimer = 0;
+                    }
+
+                    bool DoAction()
+                    {
+                        switch (gunData.CurrentActionType)
                         {
-                            if (shootDataRO.ShootTimer >= shootDataRO.GunStats.ShootDelay)
-                            {
-                                shootDataRef.ValueRW.ShootTimer = 0;
-
-                                // Fire()
-                                {
-                                    Entity ammoEntity = ecb.Instantiate(shootDataRO.AmmoPrefab);
-
-                                    var spawnTransform = localTransformLU.GetRefRO(shootDataRO.SpawnPosRot).ValueRO;
-
-                                    ecb.SetComponent(ammoEntity, LocalTransform.FromPositionRotationScale(spawnTransform.Position, spawnTransform.Rotation, shootDataRO.SpawnScale));
-
-                                    AmmoData ammoData = new()
-                                    {
-                                        Patterns = GetBulletPattern(shootDataRO.PatternSelect, shootDataRO.GunStats.Power),
-                                        CurrentIndex = 0,
-                                        CurrentActionTimer = 0
-                                    };
-
-                                    ecb.AddComponent(ammoEntity, ammoData);
-                                    ecb.AddComponent(ammoEntity, new AmmoInit());
-                                    ecb.AddSharedComponent(ammoEntity, homingDataShared);
-                                    ecb.AddSharedComponent(ammoEntity, new DelayData());
-
-                                    shootDataRef.ValueRW.CurrentAmmoCount--;
-                                }
-                            }
+                            case ActionTypes.TransformAction:
+                                gunData.CurrentTransformAction.DoAction(DeltaTime, ref localTransformRef.ValueRW);
+                                return gunData.CurrentActionTimer >= gunData.CurrentTransformAction.Duration;
+                            case ActionTypes.DelayAction:
+                                gunData.CurrentDelayAction.DoAction(gunData.DelayUntil);
+                                return gunData.CurrentActionTimer >= gunData.CurrentDelayAction.Duration;
+                            case ActionTypes.TransformWithEntities:
+                                gunData.CurrentTransformWithEntitiesAction.DoAction(DeltaTime, ref localTransformRef.ValueRW, entitiesTransform);
+                                return gunData.CurrentActionTimer >= gunData.CurrentTransformWithEntitiesAction.Duration;
+                            default:
+                                throw new System.Exception("Not Implemented");
                         }
                     }
-                    else
+                    void EndAction()
                     {
-                        if (HaveMag)
+                        switch (gunData.CurrentActionType)
                         {
-                            // AttemptReload()
-                            {
-                                shootDataRef.ValueRW.ReloadTimer += DeltaTime;
-
-                                if (shootDataRO.ReloadTimer >= shootDataRO.GunStats.ReloadDelay)
-                                {
-                                    shootDataRef.ValueRW.ReloadTimer -= shootDataRO.GunStats.ReloadDelay;
-
-                                    // Reload()
-                                    {
-                                        shootDataRef.ValueRW.CurrentMagazineCount--;
-                                        shootDataRef.ValueRW.CurrentAmmoCount = shootDataRO.GunStats.MagazineCapacity;
-                                    }
-                                }
-                            }
+                            case ActionTypes.TransformAction:
+                                gunData.CurrentTransformAction.EndAction(ref localTransformRef.ValueRW);
+                                break;
+                            case ActionTypes.DelayAction:
+                                gunData.CurrentDelayAction.EndAction();
+                                break;
+                            case ActionTypes.TransformWithEntities:
+                                gunData.CurrentTransformWithEntitiesAction.EndAction(ref localTransformRef.ValueRW, entitiesTransform);
+                                break;
                         }
                     }
+                    void GetNextAction()
+                    {
+                        switch (gunData.Patterns[gunData.CurrentIndex])
+                        {
+                            case TransformAction action:
+                                gunData.CurrentTransformAction = action;
+                                gunData.CurrentActionType = ActionTypes.TransformAction;
+                                break;
+                            case DelayAction action:
+                                gunData.CurrentDelayAction = action;
+                                gunData.CurrentActionType = ActionTypes.DelayAction;
+                                break;
+                            case TransformWithEntitiesAction action:
+                                gunData.CurrentTransformWithEntitiesAction = action;
+                                gunData.CurrentActionType = ActionTypes.TransformWithEntities;
+                                break;
+                        }
+
+                        if (++gunData.CurrentIndex == gunData.Patterns.Length) gunData.CurrentIndex = 0;
+                    }
+                    void ReadyAction()
+                    {
+                        switch (gunData.CurrentActionType)
+                        {
+                            case ActionTypes.TransformAction:
+                                gunData.CurrentTransformAction.ReadyAction(localTransformRef.ValueRW);
+                                break;
+                            case ActionTypes.DelayAction:
+                                gunData.CurrentDelayAction.ReadyAction();
+                                return;
+                            case ActionTypes.TransformWithEntities:
+                                gunData.CurrentTransformWithEntitiesAction.ReadyAction(localTransformRef.ValueRW, entitiesTransform);
+                                break;
+                        }
+                    }
+                }
+                void AttemptShoot()
+                {
+                    if (gunData.ShootTimer >= gunData.GunStats.ShootDelay)
+                    {
+                        gunData.ShootTimer = 0;
+
+                        Fire();
+                    }
+                }
+                void Fire()
+                {
+                    Entity ammoEntity = ecb.Instantiate(gunData.AmmoPrefab);
+
+                    var spawnTransform = transformLU.GetRefRO(gunData.SpawnPosRot).ValueRO;
+
+                    ecb.SetComponent(ammoEntity, LocalTransform.FromPositionRotationScale(spawnTransform.Position, spawnTransform.Rotation, gunData.SpawnScale));
+
+                    AmmoData ammoData = new()
+                    {
+                        Patterns = GetBulletPattern(gunData.PatternSelect, gunData.GunStats.Power),
+                        CurrentIndex = 0,
+                        CurrentActionTimer = 0
+                    };
+
+                    ecb.AddComponent(ammoEntity, ammoData);
+                    ecb.AddComponent(ammoEntity, new AmmoInit());
+
+                    ecb.AddSharedComponent(ammoEntity, new AmmoDataShared() { FiredFrom = gunEntity });
+                    ecb.AddSharedComponent(ammoEntity, homingDataShared);
+                    ecb.AddSharedComponent(ammoEntity, new DelayData());
+
+                    gunData.CurrentAmmoCount--;
+                    gunData.TotalShootCount++;
+                }
+                void AttemptReload()
+                {
+                    gunData.ReloadTimer += DeltaTime;
+
+                    if (gunData.ReloadTimer >= gunData.GunStats.ReloadDelay)
+                    {
+                        gunData.ReloadTimer -= gunData.GunStats.ReloadDelay;
+
+                        Reload();
+                    }
+                }
+                void Reload()
+                {
+                    gunData.CurrentMagazineCount--;
+                    gunData.CurrentAmmoCount = gunData.GunStats.MagazineCapacity;
                 }
 
                 IAction[] GetBulletPattern(GunPatternSelect select, float power)
@@ -249,6 +349,21 @@ namespace HomingGun
                     }
                 }
             }
+
+            // Foreach gun, Update Delay Data (if any)
+            foreach ((var gunData, var gunEntity) in SystemAPI.Query<GunData>().WithEntityAccess())
+            {
+                foreach ((var localTransformRef, var _, var ammoData, var e) in SystemAPI.Query<RefRW<LocalTransform>, DelayData, AmmoData>()
+                    .WithSharedComponentFilter(new AmmoDataShared() { FiredFrom = gunEntity })
+                    .WithEntityAccess())
+                {
+                    var Has4ShootCycleEnd = gunData.TotalShootCount % gunData.GunStats.MagazineCapacity == 0;
+                    var delayData = new DelayData() { DelayUntil = Has4ShootCycleEnd };
+                    ecb.SetSharedComponent(e, delayData);
+                }
+            }
+
+            Dependency.Complete();
         }
     }
 }

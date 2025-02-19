@@ -7,12 +7,12 @@ namespace TwinGun
     public class GunController : MonoBehaviour
     {
         [SerializeField] GunStats baseStats;
-        [SerializeField] ShootMode shootmode = ShootMode.Cycle;
+        [SerializeField] Gun rightGun;
+        [SerializeField] Gun leftGun;
 
-        [SerializeField] Gun RightGun;
-        [SerializeField] Gun LeftGun;
+        [SerializeField] PatternSelect patternSelect;
 
-        enum ShootMode { Normal, Cycle, Helix }
+        enum PatternSelect { Normal, Cycle, Helix }
 
         class Baker : Baker<GunController>
         {
@@ -20,75 +20,68 @@ namespace TwinGun
             {
                 DependsOn(authoring.baseStats);
 
-                if (authoring.shootmode == ShootMode.Normal)
+                if (authoring.patternSelect == PatternSelect.Normal)
                 {
                     var EntityA = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
-                    AddComponent(EntityA, new GunSetupData
+                    AddComponentObject(EntityA, new GunSetupData
                     {
                         GunStats = authoring.baseStats.GetStruct(),
                         PatternSelect = GunPatternSelect.Straight,
-                        GunEntity = GetEntity(authoring.RightGun, TransformUsageFlags.Dynamic),
+                        GunEntity = GetEntity(authoring.rightGun, TransformUsageFlags.Dynamic),
                     });
 
                     var EntityB = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
-                    AddComponent(EntityB, new GunSetupData
+                    AddComponentObject(EntityB, new GunSetupData
                     {
                         GunStats = authoring.baseStats.GetStruct(),
                         PatternSelect = GunPatternSelect.Straight,
-                        GunEntity = GetEntity(authoring.LeftGun, TransformUsageFlags.Dynamic),
+                        GunEntity = GetEntity(authoring.leftGun, TransformUsageFlags.Dynamic),
                     });
                 }
-                else if (authoring.shootmode == ShootMode.Cycle)
+                else if (authoring.patternSelect == PatternSelect.Cycle)
                 {
                     var stats = authoring.baseStats.GetStruct();
                     stats.ShootDelay *= 2;
 
                     var EntityA = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
-                    AddComponent(EntityA, new GunSetupData
+                    AddComponentObject(EntityA, new GunSetupData
                     {
                         GunStats = stats,
                         PatternSelect = GunPatternSelect.Straight,
-                        GunEntity = GetEntity(authoring.RightGun, TransformUsageFlags.Dynamic),
+                        GunEntity = GetEntity(authoring.rightGun, TransformUsageFlags.Dynamic),
                     });
 
                     stats.StartShootDelay = 1;
 
                     var EntityB = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
-                    AddComponent(EntityB, new GunSetupData
+                    AddComponentObject(EntityB, new GunSetupData
                     {
                         GunStats = stats,
                         PatternSelect = GunPatternSelect.Straight,
-                        GunEntity = GetEntity(authoring.LeftGun, TransformUsageFlags.Dynamic),
+                        GunEntity = GetEntity(authoring.leftGun, TransformUsageFlags.Dynamic),
                     });
                 }
-                else if (authoring.shootmode == ShootMode.Helix)
+                else if (authoring.patternSelect == PatternSelect.Helix)
                 {
                     var stats = authoring.baseStats.GetStruct();
 
                     var EntityA = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
-                    AddComponent(EntityA, new GunSetupData
+                    AddComponentObject(EntityA, new GunSetupData
                     {
                         GunStats = stats,
                         PatternSelect = GunPatternSelect.SineRight,
-                        GunEntity = GetEntity(authoring.RightGun, TransformUsageFlags.Dynamic),
+                        GunEntity = GetEntity(authoring.rightGun, TransformUsageFlags.Dynamic),
                     });
 
                     var EntityB = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
-                    AddComponent(EntityB, new GunSetupData
+                    AddComponentObject(EntityB, new GunSetupData
                     {
                         GunStats = stats,
                         PatternSelect = GunPatternSelect.SineLeft,
-                        GunEntity = GetEntity(authoring.LeftGun, TransformUsageFlags.Dynamic),
+                        GunEntity = GetEntity(authoring.leftGun, TransformUsageFlags.Dynamic),
                     });
                 }
             }
         }
-    }
-    public struct GunSetupData : IComponentData
-    {
-        public GunStatsStruct GunStats;
-        public GunPatternSelect PatternSelect;
-
-        public Entity GunEntity;
     }
 }

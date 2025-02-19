@@ -1,9 +1,7 @@
 namespace TwinGun
 {
-    using System;
     using Unity.Entities;
     using UnityEngine;
-    using static TwinGun.GunData;
 
     public class Gun : MonoBehaviour
     {
@@ -33,27 +31,19 @@ namespace TwinGun
                 }
                 gunData.SpawnScale = authoring.AmmoPrefab.transform.localScale.x;
 
-                AddComponent(baseEntity, gunData);
-                SetComponentEnabled<GunData>(baseEntity, false);
-            }
-        }
-        public static IAction[] GetBulletPattern(GunPatternSelect select, float power)
-        {
-            switch (select)
-            {
-                case GunPatternSelect.Straight:
-                    return BulletPatterns.Straight(power);
-                case GunPatternSelect.SineRight:
-                    return BulletPatterns.Sine(power, Vector3.right, 0.2f);
-                case GunPatternSelect.SineLeft:
-                    return BulletPatterns.Sine(power, Vector3.left, 0.2f);
-                default:
-                    throw new NotImplementedException();
+                AddComponentObject(baseEntity, gunData);
             }
         }
     }
+    public class GunSetupData : IComponentData
+    {
+        public GunStatsStruct GunStats;
+        public GunData.GunPatternSelect PatternSelect;
+        public Entity[] WithEntities;
 
-    public struct GunData : IComponentData, IEnableableComponent
+        public Entity GunEntity;
+    }
+    public class GunData : IComponentData
     {
         // Set by Baker
         public Entity AmmoPrefab;
@@ -61,6 +51,18 @@ namespace TwinGun
         public float SpawnScale;
 
         // Set by Init System
+        public IAction[] Patterns;
+        public int CurrentIndex;
+
+        public ActionTypes CurrentActionType;
+        public TransformAction CurrentTransformAction;
+        public TransformWithEntitiesAction CurrentTransformWithEntitiesAction;
+        public DelayAction CurrentDelayAction;
+        public Entity[] WithEntities;
+        public bool DelayUntil;
+
+        public float CurrentActionTimer;
+
         public GunStatsStruct GunStats;
         public GunPatternSelect PatternSelect;
 
@@ -69,14 +71,16 @@ namespace TwinGun
         public float ShootTimer;
         public float ReloadTimer;
 
-        public void Setup(GunStatsStruct GunStats, GunPatternSelect PatternSelect)
-        {
-            this.GunStats = GunStats;
-            this.PatternSelect = PatternSelect;
+        public int TotalShootCount;
 
-            CurrentMagazineCount = GunStats.MagazineCount;
-            CurrentAmmoCount = GunStats.MagazineCapacity;
-            ShootTimer = -GunStats.StartShootDelay;
+        public void Setup(GunStatsStruct gunStats, GunPatternSelect gunPatternSelect)
+        {
+            GunStats = gunStats;
+            PatternSelect = gunPatternSelect;
+
+            CurrentMagazineCount = gunStats.MagazineCount;
+            CurrentAmmoCount = gunStats.MagazineCapacity;
+            ShootTimer = -gunStats.StartShootDelay;
             ReloadTimer = 0;
         }
 

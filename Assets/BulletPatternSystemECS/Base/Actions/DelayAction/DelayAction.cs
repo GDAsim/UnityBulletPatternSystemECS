@@ -15,11 +15,7 @@ public struct DelayAction : IAction
     float IAction.StartTimer { get => 0; }
     #endregion
 
-    public void ReadyAction()
-    {
-        
-    }
-
+    public void ReadyAction() { }
     public void DoAction(bool DelayUntil)
     {
         if (!UseDelayUntil) return;
@@ -34,8 +30,5 @@ public struct DelayAction : IAction
         }
     }
 
-    public void EndAction()
-    {
-
-    }
+    public void EndAction() { }
 }

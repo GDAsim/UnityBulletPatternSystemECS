@@ -1,9 +1,7 @@
 namespace SimpleGun
 {
-    using System;
     using Unity.Entities;
     using UnityEngine;
-    using static SimpleGun.GunData;
 
     public class Gun : MonoBehaviour
     {
@@ -33,13 +31,21 @@ namespace SimpleGun
                 }
                 gunData.SpawnScale = authoring.AmmoPrefab.transform.localScale.x;
 
-                AddComponent(baseEntity, gunData);
-                SetComponentEnabled<GunData>(baseEntity, false);
+                AddComponentObject(baseEntity, gunData);
             }
         }
     }
 
-    public struct GunData : IComponentData, IEnableableComponent
+    public class GunSetupData : IComponentData
+    {
+        public GunStatsStruct GunStats;
+        public GunData.GunPatternSelect PatternSelect;
+        public Entity[] WithEntities;
+
+        public Entity GunEntity;
+    }
+
+    public class GunData : IComponentData
     {
         // Set by Baker
         public Entity AmmoPrefab;
@@ -47,6 +53,18 @@ namespace SimpleGun
         public float SpawnScale;
 
         // Set by Init System
+        public IAction[] Patterns;
+        public int CurrentIndex;
+
+        public ActionTypes CurrentActionType;
+        public TransformAction CurrentTransformAction;
+        public TransformWithEntitiesAction CurrentTransformWithEntitiesAction;
+        public DelayAction CurrentDelayAction;
+        public Entity[] WithEntities;
+        public bool DelayUntil;
+
+        public float CurrentActionTimer;
+
         public GunStatsStruct GunStats;
         public GunPatternSelect PatternSelect;
 
@@ -55,14 +73,16 @@ namespace SimpleGun
         public float ShootTimer;
         public float ReloadTimer;
 
-        public void Setup(GunStatsStruct GunStats, GunPatternSelect PatternSelect)
-        {
-            this.GunStats = GunStats;
-            this.PatternSelect = PatternSelect;
+        public int TotalShootCount;
 
-            CurrentMagazineCount = GunStats.MagazineCount;
-            CurrentAmmoCount = GunStats.MagazineCapacity;
-            ShootTimer = -GunStats.StartShootDelay;
+        public void Setup(GunStatsStruct gunStats, GunPatternSelect gunPatternSelect)
+        {
+            GunStats = gunStats;
+            PatternSelect = gunPatternSelect;
+
+            CurrentMagazineCount = gunStats.MagazineCount;
+            CurrentAmmoCount = gunStats.MagazineCapacity;
+            ShootTimer = -gunStats.StartShootDelay;
             ReloadTimer = 0;
         }
 

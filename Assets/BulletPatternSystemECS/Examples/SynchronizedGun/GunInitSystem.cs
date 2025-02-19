@@ -5,7 +5,6 @@ namespace SynchronizedGun
     using UnityEngine;
 
     [DisableAutoCreation]
-    [UpdateBefore(typeof(GunSystem))]
     public partial class GunInitSystem : SystemBase
     {
         ComponentLookup<LocalTransform> transformLU;
@@ -28,12 +27,16 @@ namespace SynchronizedGun
                 var setupData_RO = gunSetupData;
 
                 if (!EntityManager.HasComponent<GunData>(setupData_RO.GunEntity)) continue;
-                
-                var gunData = EntityManager.GetComponentObject<GunData>(setupData_RO.GunEntity);
-                gunData.Setup(setupData_RO.GunStats, setupData_RO.PatternSelect);
-                gunData.WithEntities = setupData_RO.WithEntities;
 
-                // SetupPreShoot
+                var gunData = EntityManager.GetComponentObject<GunData>(setupData_RO.GunEntity);
+
+                SetupShoot();
+
+                SetupPreShoot();
+
+                ecb.DestroyEntity(entity);
+
+                void SetupPreShoot()
                 {
                     IAction[] systemPattern = default;
                     float StartSystemDelay = 0;
@@ -88,11 +91,9 @@ namespace SynchronizedGun
 
                     gunData.Patterns = systemPattern;
                     gunData.CurrentActionTimer = -StartSystemDelay;
-                }
-                
 
-                if (gunData.Patterns != null && gunData.Patterns.Length >= 0)
-                {
+                    if (gunData.Patterns == null || gunData.Patterns.Length == 0) return;
+
                     var localTransform = transformLU[setupData_RO.GunEntity];
 
                     LocalTransform[] entitiesTransform = new LocalTransform[gunData.WithEntities.Length];
@@ -101,83 +102,93 @@ namespace SynchronizedGun
                         entitiesTransform[i] = transformLU[gunData.WithEntities[i]];
                     }
 
-                    // GetNextAction();
-                    switch (gunData.Patterns[gunData.CurrentIndex])
+                    GetNextAction();
+
+                    ReadyAction();
+
+                    void GetNextAction()
                     {
-                        case TransformAction action:
-                            gunData.CurrentTransformAction = action;
-                            gunData.CurrentActionType = ActionTypes.TransformAction;
-                            break;
-                        case DelayAction action:
-                            gunData.CurrentDelayAction = action;
-                            gunData.CurrentActionType = ActionTypes.DelayAction;
-                            break;
-                        case TransformWithEntitiesAction action:
-                            gunData.CurrentTransformWithEntitiesAction = action;
-                            gunData.CurrentActionType = ActionTypes.TransformWithEntities;
-                            break;
+                        switch (gunData.Patterns[gunData.CurrentIndex])
+                        {
+                            case TransformAction action:
+                                gunData.CurrentTransformAction = action;
+                                gunData.CurrentActionType = ActionTypes.TransformAction;
+                                break;
+                            case DelayAction action:
+                                gunData.CurrentDelayAction = action;
+                                gunData.CurrentActionType = ActionTypes.DelayAction;
+                                break;
+                            case TransformWithEntitiesAction action:
+                                gunData.CurrentTransformWithEntitiesAction = action;
+                                gunData.CurrentActionType = ActionTypes.TransformWithEntities;
+                                break;
+                        }
+                        if (++gunData.CurrentIndex == gunData.Patterns.Length) gunData.CurrentIndex = 0;
+                    }
+                    void ReadyAction()
+                    {
+                        switch (gunData.CurrentActionType)
+                        {
+                            case ActionTypes.TransformAction:
+                                gunData.CurrentTransformAction.ReadyAction(localTransform);
+                                break;
+                            case ActionTypes.DelayAction:
+                                gunData.CurrentDelayAction.ReadyAction();
+                                return;
+                            case ActionTypes.TransformWithEntities:
+                                gunData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, entitiesTransform);
+                                break;
+                        }
                     }
 
-                    // ReadyAction();
-                    switch (gunData.CurrentActionType)
+                    TransformData TranslateMove1(TransformData startData, float speed, float time, LocalTransform[] entities)
                     {
-                        case ActionTypes.TransformAction:
-                            gunData.CurrentTransformAction.ReadyAction(localTransform);
-                            break;
-                        case ActionTypes.DelayAction:
-                            gunData.CurrentDelayAction.ReadyAction();
-                            return;
-                        case ActionTypes.TransformWithEntities:
-                            gunData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, entitiesTransform);
-                            break;
+                        float lerpTime;
+                        if (time == 0) lerpTime = 1;
+                        else lerpTime = time / gunData.GunStats.ShootDelay;
+
+                        startData.Position = Vector3.Lerp(startData.Position, entities[0].Position, lerpTime);
+
+                        return startData;
                     }
+                    TransformData TranslateMove2(TransformData startData, float speed, float time, LocalTransform[] entities)
+                    {
+                        float lerpTime;
+                        if (time == 0) lerpTime = 1;
+                        else lerpTime = time / gunData.GunStats.ShootDelay;
 
-                    if (++gunData.CurrentIndex == gunData.Patterns.Length) gunData.CurrentIndex = 0;
+                        startData.Position = Vector3.Lerp(startData.Position, entities[1].Position, lerpTime);
+
+                        return startData;
+                    }
+                    TransformData TranslateMove3(TransformData startData, float speed, float time, LocalTransform[] entities)
+                    {
+                        float lerpTime;
+                        if (time == 0) lerpTime = 1;
+                        else lerpTime = time / gunData.GunStats.ShootDelay;
+
+                        startData.Position = Vector3.Lerp(startData.Position, entities[2].Position, lerpTime);
+
+                        return startData;
+                    }
+                    TransformData TranslateMove4(TransformData startData, float speed, float time, LocalTransform[] entities)
+                    {
+                        float lerpTime;
+                        if (time == 0) lerpTime = 1;
+                        else lerpTime = time / gunData.GunStats.ShootDelay;
+
+                        startData.Position = Vector3.Lerp(startData.Position, entities[3].Position, lerpTime);
+
+                        return startData;
+                    }
                 }
 
-                ecb.SetComponent(setupData_RO.GunEntity, gunData);
-
-                ecb.DestroyEntity(entity);
-
-                TransformData TranslateMove1(TransformData startData, float speed, float time, LocalTransform[] entities)
+                void SetupShoot()
                 {
-                    float lerpTime;
-                    if (time == 0) lerpTime = 1;
-                    else lerpTime = time / gunData.GunStats.ShootDelay;
+                    gunData.Setup(setupData_RO.GunStats, setupData_RO.PatternSelect);
+                    gunData.WithEntities = setupData_RO.WithEntities;
 
-                    startData.Position = Vector3.Lerp(startData.Position, entities[0].Position, lerpTime);
-
-                    return startData;
-                }
-                TransformData TranslateMove2(TransformData startData, float speed, float time, LocalTransform[] entities)
-                {
-                    float lerpTime;
-                    if (time == 0) lerpTime = 1;
-                    else lerpTime = time / gunData.GunStats.ShootDelay;
-
-                    startData.Position = Vector3.Lerp(startData.Position, entities[1].Position, lerpTime);
-
-                    return startData;
-                }
-                TransformData TranslateMove3(TransformData startData, float speed, float time, LocalTransform[] entities)
-                {
-                    float lerpTime;
-                    if (time == 0) lerpTime = 1;
-                    else lerpTime = time / gunData.GunStats.ShootDelay;
-
-                    startData.Position = Vector3.Lerp(startData.Position, entities[2].Position, lerpTime);
-
-                    return startData;
-                }
-                TransformData TranslateMove4(TransformData startData, float speed, float time, LocalTransform[] entities)
-                {
-                    float lerpTime;
-                    if (time == 0) lerpTime = 1;
-                    else lerpTime = time / gunData.GunStats.ShootDelay;
-
-                    startData.Position = Vector3.Lerp(startData.Position, entities[3].Position, lerpTime);
-
-                    return startData;
+                    ecb.SetComponent(setupData_RO.GunEntity, gunData);
                 }
             }
         }

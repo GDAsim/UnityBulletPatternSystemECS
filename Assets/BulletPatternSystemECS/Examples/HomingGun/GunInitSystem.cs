@@ -1,39 +1,47 @@
 namespace HomingGun
 {
     using Unity.Entities;
+    using Unity.Transforms;
 
     [DisableAutoCreation]
-    public partial struct GunInitSystem : ISystem
+    public partial class GunInitSystem : SystemBase
     {
-        ComponentLookup<GunData> gunDataLU;
-        public void OnCreate(ref SystemState state)
+        ComponentLookup<LocalTransform> transformLU;
+
+        protected override void OnCreate()
         {
-            gunDataLU = state.GetComponentLookup<GunData>(false);
+            transformLU = GetComponentLookup<LocalTransform>(true);
         }
-        public void OnDestroy(ref SystemState state) { }
-        public void OnUpdate(ref SystemState state)
+        protected override void OnDestroy() { }
+        protected override void OnUpdate()
         {
-            gunDataLU.Update(ref state);
-
-            state.Dependency.Complete();
-
             var ecbSingleton = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
-            EntityCommandBuffer ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
 
-            foreach ((var gunSetupData, var entity) in SystemAPI.Query<RefRO<GunSetupData>>().WithEntityAccess())
+            EntityCommandBuffer ecb = ecbSingleton.CreateCommandBuffer(EntityManager.WorldUnmanaged);
+
+            transformLU.Update(this);
+
+            foreach ((var gunSetupData, var entity) in SystemAPI.Query<GunSetupData>().WithEntityAccess())
             {
-                var setupData_RO = gunSetupData.ValueRO;
+                var setupData_RO = gunSetupData;
 
-                if (!gunDataLU.HasComponent(setupData_RO.GunEntity)) continue;
+                if (!EntityManager.HasComponent<GunData>(setupData_RO.GunEntity)) continue;
 
-                var gunDataRef = gunDataLU.GetRefRW(setupData_RO.GunEntity);
-                gunDataRef.ValueRW.Setup(setupData_RO.GunStats, setupData_RO.PatternSelect);
+                var gunData = EntityManager.GetComponentObject<GunData>(setupData_RO.GunEntity);
+
+                SetupShoot();
 
                 ecb.AddSharedComponent(setupData_RO.GunEntity, setupData_RO.GunHomingData);
 
-                state.EntityManager.SetComponentEnabled<GunData>(setupData_RO.GunEntity, true);
-
                 ecb.DestroyEntity(entity);
+
+                void SetupShoot()
+                {
+                    gunData.Setup(setupData_RO.GunStats, setupData_RO.PatternSelect);
+                    gunData.WithEntities = setupData_RO.WithEntities;
+
+                    ecb.SetComponent(setupData_RO.GunEntity, gunData);
+                }
             }
         }
     }

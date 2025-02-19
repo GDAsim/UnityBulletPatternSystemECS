@@ -9,10 +9,10 @@ namespace SynchronizedGun
         {
             public override void Bake(BulletPatternSystemAuthoring authoring)
             {
-                var gunInitSystemHandle = World.DefaultGameObjectInjectionWorld.CreateSystem<GunInitSystem>();
-                var gunSystemHandle = World.DefaultGameObjectInjectionWorld.CreateSystem<GunSystem>();
-                var ammoinitSystemHandle = World.DefaultGameObjectInjectionWorld.CreateSystem<AmmoInitSystem>();
-                var ammoSystemHandle = World.DefaultGameObjectInjectionWorld.CreateSystem<AmmoSystem>();
+                var gunInitSystemHandle = World.DefaultGameObjectInjectionWorld.CreateSystemManaged<GunInitSystem>();
+                var gunSystemHandle = World.DefaultGameObjectInjectionWorld.CreateSystemManaged<GunSystem>();
+                var ammoinitSystemHandle = World.DefaultGameObjectInjectionWorld.CreateSystemManaged<AmmoInitSystem>();
+                var ammoSystemHandle = World.DefaultGameObjectInjectionWorld.CreateSystemManaged<AmmoSystem>();
 
                 var SimSG = World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<SimulationSystemGroup>();
 

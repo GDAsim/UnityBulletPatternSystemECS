@@ -1,17 +1,15 @@
 namespace HomingGun
 {
     using System;
-    using Unity.Burst;
     using Unity.Entities;
     using UnityEngine;
-    using static GunData;
 
     public class GunController : MonoBehaviour
     {
         [SerializeField] GunStats baseStats;
-        [SerializeField] HomingType shootmode;
-
         [SerializeField] Gun Gun;
+
+        [SerializeField] PatternSelect patternSelect;
 
         [Header("Homing Properties")]
         [SerializeField] Transform HomingTarget;
@@ -27,7 +25,7 @@ namespace HomingGun
         [SerializeField] float AcceleratedRadius = 10;
         [SerializeField] float AccelerationMulti = 3;
 
-        enum HomingType { Simple, DistanceProximity, LimitedProximity, Accelerated }
+        enum PatternSelect { Simple, DistanceProximity, LimitedProximity, Accelerated }
 
         class Baker : Baker<GunController>
         {
@@ -35,20 +33,20 @@ namespace HomingGun
             {
                 DependsOn(authoring.baseStats);
 
-                GunPatternSelect PatternSelect;
-                switch (authoring.shootmode)
+                GunData.GunPatternSelect gunPatternSelect;
+                switch (authoring.patternSelect)
                 {
-                    case HomingType.Simple:
-                        PatternSelect = GunPatternSelect.Simple;
+                    case PatternSelect.Simple:
+                        gunPatternSelect = GunData.GunPatternSelect.Simple;
                         break;
-                    case HomingType.DistanceProximity:
-                        PatternSelect = GunPatternSelect.DistanceProximity;
+                    case PatternSelect.DistanceProximity:
+                        gunPatternSelect = GunData.GunPatternSelect.DistanceProximity;
                         break;
-                    case HomingType.LimitedProximity:
-                        PatternSelect = GunPatternSelect.LimitedProximity;
+                    case PatternSelect.LimitedProximity:
+                        gunPatternSelect = GunData.GunPatternSelect.LimitedProximity;
                         break;
-                    case HomingType.Accelerated:
-                        PatternSelect = GunPatternSelect.Accelerated;
+                    case PatternSelect.Accelerated:
+                        gunPatternSelect = GunData.GunPatternSelect.Accelerated;
                         break;
                     default:
                         throw new NotImplementedException();
@@ -56,10 +54,10 @@ namespace HomingGun
 
                 var EntityA = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
                 var gunEntity = GetEntity(authoring.Gun, TransformUsageFlags.Dynamic);
-                AddComponent(EntityA, new GunSetupData
+                AddComponentObject(EntityA, new GunSetupData
                 {
                     GunStats = authoring.baseStats.GetStruct(),
-                    PatternSelect = PatternSelect,
+                    PatternSelect = gunPatternSelect,
                     GunEntity = gunEntity,
 
                     GunHomingData = new HomingData()
@@ -78,16 +76,5 @@ namespace HomingGun
                 });
             }
         }
-    }
-
-    [BurstCompile]
-    public struct GunSetupData : IComponentData
-    {
-        public GunStatsStruct GunStats;
-        public GunPatternSelect PatternSelect;
-
-        public Entity GunEntity;
-
-        public HomingData GunHomingData;
     }
 }

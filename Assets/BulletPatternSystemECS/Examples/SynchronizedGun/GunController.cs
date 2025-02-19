@@ -1,71 +1,55 @@
 namespace SynchronizedGun
 {
+    using System;
     using Unity.Entities;
     using UnityEngine;
-    using static GunData;
 
     public class GunController : MonoBehaviour
     {
         [SerializeField] GunStats baseStats;
-        [SerializeField] SyncType snycType;
-
         [SerializeField] Gun Gun;
+
+        [SerializeField] PatternSelect patternSelect;
 
         [SerializeField] Transform Pos1;
         [SerializeField] Transform Pos2;
         [SerializeField] Transform Pos3;
         [SerializeField] Transform Pos4;
 
-        enum SyncType { ShootMoveSync, BulletMoveSync }
+        enum PatternSelect { ShootMoveSync, BulletMoveSync }
         class Baker : Baker<GunController>
         {
             public override void Bake(GunController authoring)
             {
-                if (authoring.snycType == SyncType.ShootMoveSync)
+                GunData.GunPatternSelect gunPatternSelect;
+                switch (authoring.patternSelect)
                 {
-                    var EntityA = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
-                    AddComponentObject(EntityA, new GunSetupData
-                    {
-                        GunStats = authoring.baseStats.GetStruct(),
-                        PatternSelect = GunPatternSelect.ShootMoveSync,
-                        GunEntity = GetEntity(authoring.Gun, TransformUsageFlags.Dynamic),
-
-                        WithEntities = new Entity[]
-                        {
-                            GetEntity(authoring.Pos1, TransformUsageFlags.Dynamic),
-                            GetEntity(authoring.Pos2, TransformUsageFlags.Dynamic),
-                            GetEntity(authoring.Pos3, TransformUsageFlags.Dynamic),
-                            GetEntity(authoring.Pos4, TransformUsageFlags.Dynamic),
-                        }
-                    });
+                    case PatternSelect.ShootMoveSync:
+                        gunPatternSelect = GunData.GunPatternSelect.ShootMoveSync;
+                        break;
+                    case PatternSelect.BulletMoveSync:
+                        gunPatternSelect = GunData.GunPatternSelect.BulletMoveSync;
+                        break;
+                    default:
+                        throw new NotImplementedException();
                 }
-                else if (authoring.snycType == SyncType.BulletMoveSync)
+                
+                var EntityA = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
+                AddComponentObject(EntityA, new GunSetupData
                 {
-                    var EntityA = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
-                    AddComponentObject(EntityA, new GunSetupData
-                    {
-                        GunStats = authoring.baseStats.GetStruct(),
-                        PatternSelect = GunPatternSelect.BulletMoveSync,
-                        GunEntity = GetEntity(authoring.Gun, TransformUsageFlags.Dynamic),
+                    GunStats = authoring.baseStats.GetStruct(),
+                    PatternSelect = gunPatternSelect,
+                    GunEntity = GetEntity(authoring.Gun, TransformUsageFlags.Dynamic),
 
-                        WithEntities = new Entity[]
-                        {
-                            GetEntity(authoring.Pos1, TransformUsageFlags.Dynamic),
-                            GetEntity(authoring.Pos2, TransformUsageFlags.Dynamic),
-                            GetEntity(authoring.Pos3, TransformUsageFlags.Dynamic),
-                            GetEntity(authoring.Pos4, TransformUsageFlags.Dynamic),
-                        }
-                    });
-                }
+                    WithEntities = new Entity[]
+                    {
+                        GetEntity(authoring.Pos1, TransformUsageFlags.Dynamic),
+                        GetEntity(authoring.Pos2, TransformUsageFlags.Dynamic),
+                        GetEntity(authoring.Pos3, TransformUsageFlags.Dynamic),
+                        GetEntity(authoring.Pos4, TransformUsageFlags.Dynamic),
+                    }
+                });
             }
         }
-    }
-    public class GunSetupData : IComponentData
-    {
-        public GunStatsStruct GunStats;
-        public GunPatternSelect PatternSelect;
-        public Entity[] WithEntities;
-
-        public Entity GunEntity;
     }
 }

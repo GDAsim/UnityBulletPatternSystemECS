@@ -1,10 +1,7 @@
 namespace TeleportGun
 {
-    using System;
     using Unity.Entities;
-    using Unity.Mathematics;
     using UnityEngine;
-    using static TeleportGun.GunData;
 
     public class Gun : MonoBehaviour
     {
@@ -34,99 +31,20 @@ namespace TeleportGun
                 }
                 gunData.SpawnScale = authoring.AmmoPrefab.transform.localScale.x;
 
-                AddComponent(baseEntity, gunData);
-                SetComponentEnabled<GunData>(baseEntity, false);
-            }
-        }
-        public static IAction[] GetBulletPattern(GunPatternSelect select, float power)
-        {
-            IAction[] bulletPattern = null;
-
-            switch (select)
-            {
-                case GunPatternSelect.InstantAction:
-                    bulletPattern = new IAction[4]
-                    {
-                        new TransformAction
-                        {
-                            Duration = 1,
-                            StartTime = 0,
-
-                            Action = TransformAction.MoveForward,
-                            ActionSpeed = power,
-                            IsDeltaAction = true,
-                        },
-                        new TransformAction
-                        {
-                            Action = InstantTeleportRight,
-                            ActionSpeed = power,
-                            IsDeltaAction = false,
-                        },
-                        new TransformAction
-                        {
-                            Duration = 1,
-                            StartTime = 0,
-
-                            Action = TransformAction.MoveForward,
-                            ActionSpeed = power,
-                            IsDeltaAction = true,
-                        },
-                        new TransformAction
-                        {
-                            Action = InstantTeleportLeft,
-                            ActionSpeed = power,
-                            IsDeltaAction = false,
-                        },
-                    };
-                    return bulletPattern;
-                case GunPatternSelect.JumpAction:
-                    bulletPattern = new IAction[2]
-                {
-                    new TransformAction
-                    {
-                        Duration = 1,
-                        StartTime = 0,
-
-                        Action = TransformAction.MoveForward,
-                        ActionSpeed = power,
-                        IsDeltaAction = true,
-                    },
-                    new TransformAction
-                    {
-                        Duration = 1,
-                        StartTime = 1,
-
-                        Action = TransformAction.MoveForward,
-                        ActionSpeed = power,
-                        IsDeltaAction = false,
-                    },
-                };
-                    return bulletPattern;
-
-                default:
-                    throw new NotImplementedException();
-            }
-
-            TransformData InstantTeleportRight(TransformData startData, float speed, float time)
-            {
-                var right = math.mul(startData.Rotation, Vector3.right);
-
-                startData.Position = startData.Position + right;
-
-                return startData;
-            }
-            TransformData InstantTeleportLeft(TransformData startData, float speed, float time)
-            {
-                var left = math.mul(startData.Rotation, Vector3.left);
-
-                startData.Position = startData.Position + left;
-
-                return startData;
+                AddComponentObject(baseEntity, gunData);
             }
         }
     }
 
-    public struct GunData : IComponentData, IEnableableComponent
+    public class GunSetupData : IComponentData
+    {
+        public GunStatsStruct GunStats;
+        public GunData.GunPatternSelect PatternSelect;
+        public Entity[] WithEntities;
+
+        public Entity GunEntity;
+    }
+    public class GunData : IComponentData
     {
         // Set by Baker
         public Entity AmmoPrefab;
@@ -134,6 +52,18 @@ namespace TeleportGun
         public float SpawnScale;
 
         // Set by Init System
+        public IAction[] Patterns;
+        public int CurrentIndex;
+
+        public ActionTypes CurrentActionType;
+        public TransformAction CurrentTransformAction;
+        public TransformWithEntitiesAction CurrentTransformWithEntitiesAction;
+        public DelayAction CurrentDelayAction;
+        public Entity[] WithEntities;
+        public bool DelayUntil;
+
+        public float CurrentActionTimer;
+
         public GunStatsStruct GunStats;
         public GunPatternSelect PatternSelect;
 
@@ -142,14 +72,16 @@ namespace TeleportGun
         public float ShootTimer;
         public float ReloadTimer;
 
-        public void Setup(GunStatsStruct GunStats, GunPatternSelect PatternSelect)
-        {
-            this.GunStats = GunStats;
-            this.PatternSelect = PatternSelect;
+        public int TotalShootCount;
 
-            CurrentMagazineCount = GunStats.MagazineCount;
-            CurrentAmmoCount = GunStats.MagazineCapacity;
-            ShootTimer = -GunStats.StartShootDelay;
+        public void Setup(GunStatsStruct gunStats, GunPatternSelect gunPatternSelect)
+        {
+            GunStats = gunStats;
+            PatternSelect = gunPatternSelect;
+
+            CurrentMagazineCount = gunStats.MagazineCount;
+            CurrentAmmoCount = gunStats.MagazineCapacity;
+            ShootTimer = -gunStats.StartShootDelay;
             ReloadTimer = 0;
         }
         public enum GunPatternSelect

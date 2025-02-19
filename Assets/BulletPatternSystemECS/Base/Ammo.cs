@@ -2,10 +2,7 @@ using Unity.Burst;
 using Unity.Entities;
 using UnityEngine;
 
-public class Ammo : MonoBehaviour
-{
-    
-}
+public class Ammo : MonoBehaviour { }
 
 [BurstCompile]
 public class AmmoData : IComponentData

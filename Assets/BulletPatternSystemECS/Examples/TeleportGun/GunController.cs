@@ -1,17 +1,17 @@
 namespace TeleportGun
 {
+    using System;
     using Unity.Entities;
     using UnityEngine;
-    using static TeleportGun.GunData;
 
     public class GunController : MonoBehaviour
     {
         [SerializeField] GunStats baseStats;
-        [SerializeField] ShootMode shootmode;
-
         [SerializeField] Gun Gun;
 
-        enum ShootMode
+        [SerializeField] PatternSelect patternSelect;
+
+        enum PatternSelect
         {
             InstantAction, // Apply One Time
             JumpAction // Start Action with a StartTime
@@ -23,34 +23,27 @@ namespace TeleportGun
             {
                 DependsOn(authoring.baseStats);
 
-                if (authoring.shootmode == ShootMode.InstantAction)
+                GunData.GunPatternSelect gunPatternSelect;
+                switch (authoring.patternSelect)
                 {
-                    var EntityA = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
-                    AddComponent(EntityA, new GunSetupData
-                    {
-                        GunStats = authoring.baseStats.GetStruct(),
-                        PatternSelect = GunPatternSelect.InstantAction,
-                        GunEntity = GetEntity(authoring.Gun, TransformUsageFlags.Dynamic),
-                    });
+                    case PatternSelect.InstantAction:
+                        gunPatternSelect = GunData.GunPatternSelect.InstantAction;
+                        break;
+                    case PatternSelect.JumpAction:
+                        gunPatternSelect = GunData.GunPatternSelect.JumpAction;
+                        break;
+                    default:
+                        throw new NotImplementedException();
                 }
-                else if (authoring.shootmode == ShootMode.JumpAction)
+                
+                var EntityA = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
+                AddComponentObject(EntityA, new GunSetupData
                 {
-                    var EntityA = CreateAdditionalEntity(TransformUsageFlags.Dynamic);
-                    AddComponent(EntityA, new GunSetupData
-                    {
-                        GunStats = authoring.baseStats.GetStruct(),
-                        PatternSelect = GunPatternSelect.JumpAction,
-                        GunEntity = GetEntity(authoring.Gun, TransformUsageFlags.Dynamic),
-                    });
-                }
+                    GunStats = authoring.baseStats.GetStruct(),
+                    PatternSelect = gunPatternSelect,
+                    GunEntity = GetEntity(authoring.Gun, TransformUsageFlags.Dynamic),
+                });
             }
         }
-    }
-    public struct GunSetupData : IComponentData
-    {
-        public GunStatsStruct GunStats;
-        public GunPatternSelect PatternSelect;
-
-        public Entity GunEntity;
     }
 }

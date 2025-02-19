@@ -24,9 +24,6 @@ public partial struct TransformAction : IAction
     float IAction.StartTimer { get => StartTime; }
     #endregion
 
-    /// <summary>
-    /// Prep Function - Call Once Before Update
-    /// </summary>
     public void ReadyAction(LocalTransform transform)
     {
         startData = new(transform);
@@ -36,10 +33,6 @@ public partial struct TransformAction : IAction
         prevData = Action.Invoke(startData, ActionSpeed, StartTime);
     }
 
-    /// <summary>
-    /// Update Function
-    /// Delta time is required in case for a custom time implementation
-    /// </summary>
     public void DoAction(float deltatime, ref LocalTransform localTransform)
     {
         timer += deltatime;

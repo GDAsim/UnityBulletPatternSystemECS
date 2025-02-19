@@ -36,7 +36,15 @@ namespace SynchronizedGun
         }
     }
 
-    public class GunData : IComponentData, IEnableableComponent
+    public class GunSetupData : IComponentData
+    {
+        public GunStatsStruct GunStats;
+        public GunData.GunPatternSelect PatternSelect;
+        public Entity[] WithEntities;
+
+        public Entity GunEntity;
+    }
+    public class GunData : IComponentData
     {
         // Set by Baker
         public Entity AmmoPrefab;
@@ -65,22 +73,21 @@ namespace SynchronizedGun
         public float ReloadTimer;
 
         public int TotalShootCount;
-        public bool Has4ShootCycleEnd => TotalShootCount % GunStats.MagazineCapacity == 0;
 
-        public void Setup(GunStatsStruct GunStats, GunPatternSelect PatternSelect)
+        public void Setup(GunStatsStruct gunStats, GunPatternSelect gunPatternSelect)
         {
-            this.GunStats = GunStats;
-            this.PatternSelect = PatternSelect;
+            this.GunStats = gunStats;
+            this.PatternSelect = gunPatternSelect;
 
-            CurrentMagazineCount = GunStats.MagazineCount;
-            CurrentAmmoCount = GunStats.MagazineCapacity;
-            ShootTimer = -GunStats.StartShootDelay;
+            CurrentMagazineCount = gunStats.MagazineCount;
+            CurrentAmmoCount = gunStats.MagazineCapacity;
+            ShootTimer = -gunStats.StartShootDelay;
             ReloadTimer = 0;
         }
 
         public enum GunPatternSelect
         {
-            ShootMoveSync, 
+            ShootMoveSync,
             BulletMoveSync
         }
     }
