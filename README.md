@@ -1,6 +1,8 @@
 # Bullet Shoot System (ECS)
 ECS Version of [Bullet Pattern System done using Script Defined Sequential Action](https://github.com/GDAsim/UnityBulletPatternSystem)
 
+I have to change up the architecture a little in order to keep similar structure as the normal version
+
 Implementation Milestones:
 - [x] Basic Bullet Movement Action
 - [x] Homing Bullet Movement Action
