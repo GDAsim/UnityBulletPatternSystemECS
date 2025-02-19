@@ -6,8 +6,7 @@ Implementation Milestones:
 - [x] Homing Bullet Movement Action
 - [x] Multi Gun Controller System
 - [X] Gun Preshoot Action
-- [ ] Bullet Sync Move (Delay Action)
-- ❗ Unable to implement due to architecture
+- [X] Bullet Sync Move (Delay Action)
 - [ ] Teleport Bullet Movement (Instant Action, Delta Movement Action)
 - [ ] Bullet Spawn Bullets (Split Action)
 
