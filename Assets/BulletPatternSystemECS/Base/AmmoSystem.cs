@@ -23,94 +23,9 @@ public partial class AmmoSystem : SystemBase
         var DeltaTime = SystemAPI.Time.DeltaTime;
 
         Entities.WithName("AmmoUpdate")
-            .WithAbsent<GunHomingData>()
             .ForEach((
-                ref LocalTransform localTransform, in AmmoData ammoData) =>
-            {
-                if (ammoData.Patterns == null || ammoData.Patterns.Length == 0)
-                {
-                    return;
-                }
-
-                ammoData.CurrentActionTimer += DeltaTime;
-
-                // DoAction
-                bool DoAction;
-                switch (ammoData.CurrentActionType)
-                {
-                    case ActionTypes.TransformAction:
-                        ammoData.CurrentTransformAction.DoAction(DeltaTime, ref localTransform);
-                        DoAction = ammoData.CurrentActionTimer >= ammoData.CurrentTransformAction.Duration;
-                        break;
-                    case ActionTypes.DelayAction:
-                        ammoData.CurrentDelayAction.DoAction();
-                        DoAction = ammoData.CurrentActionTimer >= ammoData.CurrentDelayAction.Duration;
-                        break;
-                    case ActionTypes.TransformWithEntities:
-                        ammoData.CurrentTransformWithEntitiesAction.DoAction(DeltaTime, ref localTransform, new LocalTransform[] { });
-                        DoAction = ammoData.CurrentActionTimer >= ammoData.CurrentTransformWithEntitiesAction.Duration;
-                        break;
-                    default:
-                        throw new System.Exception("Not Implemented");
-                }
-
-                if (DoAction)
-                {
-                    // EndAction();
-                    switch (ammoData.CurrentActionType)
-                    {
-                        case ActionTypes.TransformAction:
-                            ammoData.CurrentTransformAction.EndAction(ref localTransform);
-                            break;
-                        case ActionTypes.DelayAction:
-                            ammoData.CurrentDelayAction.EndAction();
-                            return;
-                        case ActionTypes.TransformWithEntities:
-                            ammoData.CurrentTransformWithEntitiesAction.EndAction(ref localTransform, new LocalTransform[] { });
-                            break;
-                    }
-
-                    // GetNextAction();
-                    switch (ammoData.Patterns[ammoData.CurrentIndex])
-                    {
-                        case TransformAction action:
-                            ammoData.CurrentTransformAction = action;
-                            ammoData.CurrentActionType = ActionTypes.TransformAction;
-                            break;
-                        case DelayAction action:
-                            ammoData.CurrentDelayAction = action;
-                            ammoData.CurrentActionType = ActionTypes.DelayAction;
-                            break;
-                        case TransformWithEntitiesAction action:
-                            ammoData.CurrentTransformWithEntitiesAction = action;
-                            ammoData.CurrentActionType = ActionTypes.TransformWithEntities;
-                            break;
-                    }
-
-                    if (++ammoData.CurrentIndex == ammoData.Patterns.Length) ammoData.CurrentIndex = 0;
-
-                    // ReadyAction();
-                    switch (ammoData.CurrentActionType)
-                    {
-                        case ActionTypes.TransformAction:
-                            ammoData.CurrentTransformAction.ReadyAction(localTransform);
-                            break;
-                        case ActionTypes.DelayAction:
-                            ammoData.CurrentDelayAction.ReadyAction();
-                            return;
-                        case ActionTypes.TransformWithEntities:
-                            ammoData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, new LocalTransform[] { });
-                            break;
-                    }
-
-                    ammoData.CurrentActionTimer = 0;
-                }
-            })
-            .WithoutBurst().Run();
-
-        Entities.WithName("AmmoUpdateWithHoming")
-            .ForEach((
-                ref LocalTransform localTransform, in AmmoData ammoData, in GunHomingData homingData) =>
+                ref LocalTransform localTransform, in AmmoData ammoData, 
+                in HomingData homingData, in DelayData delayData) =>
             {
                 if (ammoData.Patterns == null || ammoData.Patterns.Length == 0)
                 {
@@ -139,7 +54,7 @@ public partial class AmmoSystem : SystemBase
                         DoAction = ammoData.CurrentActionTimer >= ammoData.CurrentTransformAction.Duration;
                         break;
                     case ActionTypes.DelayAction:
-                        ammoData.CurrentDelayAction.DoAction();
+                        ammoData.CurrentDelayAction.DoAction(delayData.DelayUntil);
                         DoAction = ammoData.CurrentActionTimer >= ammoData.CurrentDelayAction.Duration;
                         break;
                     case ActionTypes.TransformWithEntities:
@@ -160,7 +75,7 @@ public partial class AmmoSystem : SystemBase
                             break;
                         case ActionTypes.DelayAction:
                             ammoData.CurrentDelayAction.EndAction();
-                            return;
+                            break;
                         case ActionTypes.TransformWithEntities:
                             ammoData.CurrentTransformWithEntitiesAction.EndAction(ref localTransform, new LocalTransform[] { homingTransform, gunTransform });
                             break;

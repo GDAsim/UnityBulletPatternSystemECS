@@ -570,7 +570,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91ac2082fef7643439d2b07c98ab1bc2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseStats: {fileID: 11400000, guid: 701e3767b0e366e4db990ed509bf3a67, type: 2}
+  baseStats: {fileID: 11400000, guid: f3ad1896120ded04f96a2b731b7e40ed, type: 2}
   snycType: 1
   Gun: {fileID: 421724619}
   Pos1: {fileID: 1102024603}

@@ -1,5 +1,6 @@
 namespace SimpleGun
 {
+    using HomingGun;
     using System;
     using Unity.Collections;
     using Unity.Entities;
@@ -85,6 +86,8 @@ namespace SimpleGun
 
                                 Ecb.AddComponent(ammoEntity, ammoData);
                                 Ecb.AddComponent(ammoEntity, new AmmoInit());
+                                Ecb.AddSharedComponent(ammoEntity, new HomingData());
+                                Ecb.AddSharedComponent(ammoEntity, new DelayData());
 
                                 shootData.CurrentAmmoCount--;
                             }

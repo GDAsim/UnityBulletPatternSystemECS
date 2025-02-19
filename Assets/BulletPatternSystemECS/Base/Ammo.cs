@@ -1,3 +1,4 @@
+using Unity.Burst;
 using Unity.Entities;
 using UnityEngine;
 
@@ -6,6 +7,7 @@ public class Ammo : MonoBehaviour
     
 }
 
+[BurstCompile]
 public class AmmoData : IComponentData
 {
     public IAction[] Patterns;
@@ -18,4 +20,12 @@ public class AmmoData : IComponentData
 
     public float CurrentActionTimer;
 }
+
+[BurstCompile]
 public struct AmmoInit : IComponentData { }
+
+[BurstCompile]
+public struct AmmoDataShared : ISharedComponentData
+{
+    public Entity FiredFrom;
+}

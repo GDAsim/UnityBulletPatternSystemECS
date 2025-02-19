@@ -62,7 +62,7 @@ namespace HomingGun
                     PatternSelect = PatternSelect,
                     GunEntity = gunEntity,
 
-                    GunHomingData = new GunHomingData()
+                    GunHomingData = new HomingData()
                     {
                         HomingEntity = GetEntity(authoring.HomingTarget, TransformUsageFlags.Dynamic),
                         HomingRate = authoring.HomingRate,
@@ -88,6 +88,6 @@ namespace HomingGun
 
         public Entity GunEntity;
 
-        public GunHomingData GunHomingData;
+        public HomingData GunHomingData;
     }
 }

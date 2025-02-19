@@ -1,5 +1,6 @@
 namespace SynchronizedGun
 {
+    using HomingGun;
     using System;
     using Unity.Entities;
     using Unity.Transforms;
@@ -27,7 +28,7 @@ namespace SynchronizedGun
             transformLU.Update(this);
 
             var DeltaTime = SystemAPI.Time.DeltaTime;
-            foreach ((var localTransformRef, var gunData) in SystemAPI.Query<RefRW<LocalTransform>, GunData>())
+            foreach ((var localTransformRef, var gunData, var gunEntity) in SystemAPI.Query<RefRW<LocalTransform>, GunData>().WithEntityAccess())
             {
                 bool HaveAmmo = gunData.CurrentAmmoCount > 0;
                 bool HaveMag = gunData.CurrentMagazineCount > 0;
@@ -55,7 +56,7 @@ namespace SynchronizedGun
                                     DoAction = gunData.CurrentActionTimer >= gunData.CurrentTransformAction.Duration;
                                     break;
                                 case ActionTypes.DelayAction:
-                                    gunData.CurrentDelayAction.DoAction();
+                                    gunData.CurrentDelayAction.DoAction(gunData.DelayUntil);
                                     DoAction = gunData.CurrentActionTimer >= gunData.CurrentDelayAction.Duration;
                                     break;
                                 case ActionTypes.TransformWithEntities:
@@ -148,7 +149,12 @@ namespace SynchronizedGun
                                     ecb.AddComponent(ammoEntity, ammoData);
                                     ecb.AddComponent(ammoEntity, new AmmoInit());
 
+                                    ecb.AddSharedComponent(ammoEntity, new AmmoDataShared() { FiredFrom = gunEntity });
+                                    ecb.AddSharedComponent(ammoEntity, new HomingData());
+                                    ecb.AddSharedComponent(ammoEntity, new DelayData());
+
                                     gunData.CurrentAmmoCount--;
+                                    gunData.TotalShootCount++;
                                 }
                             }
                         }
@@ -181,13 +187,11 @@ namespace SynchronizedGun
                     switch (select)
                     {
                         case GunPatternSelect.ShootMoveSync:
-                            return BulletPatterns.Straight(power);
-                        case GunPatternSelect.BulletMoveSync:
-                            var bulletPattern = new IAction[2]
+                            var bulletPattern = new IAction[]
                             {
                                 new DelayAction
                                 {
-                                    DelayUntil = gunData.Has4ShootCycleEnd
+                                    UseDelayUntil = true,
                                 },
                                 new TransformAction
                                 {
@@ -199,16 +203,45 @@ namespace SynchronizedGun
                                     IsDeltaAction = true,
                                 },
                             };
-                            return BulletPatterns.Straight(power);
+                            return bulletPattern;
+                        case GunPatternSelect.BulletMoveSync:
+                            var bulletPattern2 = new IAction[]
+                            {
+                                new DelayAction
+                                {
+                                    UseDelayUntil = true,
+                                },
+                                new TransformAction
+                                {
+                                    Duration = 9999,
+                                    StartTime = 0,
+
+                                    Action = TransformAction.MoveForward,
+                                    ActionSpeed = power,
+                                    IsDeltaAction = true,
+                                },
+                            };
+                            return bulletPattern2;
                         default:
                             throw new NotImplementedException();
                     }
                 }
             }
 
+            // Foreach gun, Update Delay Data (if any)
+            foreach ((var gunData, var gunEntity) in SystemAPI.Query<GunData>().WithEntityAccess())
+            {
+                foreach ((var localTransformRef, var _, var ammoData, var e) in SystemAPI.Query<RefRW<LocalTransform>, DelayData, AmmoData>()
+                    .WithSharedComponentFilter(new AmmoDataShared() { FiredFrom = gunEntity })
+                    .WithEntityAccess())
+                {
+                    var Has4ShootCycleEnd = gunData.TotalShootCount % gunData.GunStats.MagazineCapacity == 0;
+                    var delayData = new DelayData() { DelayUntil = Has4ShootCycleEnd };
+                    ecb.SetSharedComponent(e, delayData);
+                }
+            }
+
             Dependency.Complete();
         }
-
-        
     }
 }

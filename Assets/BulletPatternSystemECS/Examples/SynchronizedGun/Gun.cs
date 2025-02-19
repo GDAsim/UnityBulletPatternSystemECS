@@ -52,6 +52,7 @@ namespace SynchronizedGun
         public TransformWithEntitiesAction CurrentTransformWithEntitiesAction;
         public DelayAction CurrentDelayAction;
         public Entity[] WithEntities;
+        public bool DelayUntil;
 
         public float CurrentActionTimer;
 
@@ -63,7 +64,7 @@ namespace SynchronizedGun
         public float ShootTimer;
         public float ReloadTimer;
 
-        public int TotalShootCount { get; set; }
+        public int TotalShootCount;
         public bool Has4ShootCycleEnd => TotalShootCount % GunStats.MagazineCapacity == 0;
 
         public void Setup(GunStatsStruct GunStats, GunPatternSelect PatternSelect)

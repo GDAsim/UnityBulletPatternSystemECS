@@ -75,7 +75,7 @@ namespace HomingGun
     }
 
     [BurstCompile]
-    public struct GunHomingData : ISharedComponentData
+    public struct HomingData : ISharedComponentData
     {
         [Header("Homing Properties")]
         public Entity HomingEntity;
@@ -91,5 +91,11 @@ namespace HomingGun
         [Header("Accelerated Properties")]
         public float AcceleratedRadius;
         public float AccelerationMulti;
+    }
+
+    [BurstCompile]
+    public struct DelayData : ISharedComponentData
+    {
+        public bool DelayUntil;
     }
 }

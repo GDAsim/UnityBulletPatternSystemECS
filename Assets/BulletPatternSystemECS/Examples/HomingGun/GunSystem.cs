@@ -26,7 +26,7 @@ namespace HomingGun
 
             var DeltaTime = SystemAPI.Time.DeltaTime;
 
-            foreach ((var shootDataRef, var homingDataShared) in SystemAPI.Query<RefRW<GunData>, GunHomingData>())
+            foreach ((var shootDataRef, var homingDataShared) in SystemAPI.Query<RefRW<GunData>, HomingData>())
             {
                 var shootDataRO = shootDataRef.ValueRO;
 
@@ -63,6 +63,7 @@ namespace HomingGun
                                     ecb.AddComponent(ammoEntity, ammoData);
                                     ecb.AddComponent(ammoEntity, new AmmoInit());
                                     ecb.AddSharedComponent(ammoEntity, homingDataShared);
+                                    ecb.AddSharedComponent(ammoEntity, new DelayData());
 
                                     shootDataRef.ValueRW.CurrentAmmoCount--;
                                 }

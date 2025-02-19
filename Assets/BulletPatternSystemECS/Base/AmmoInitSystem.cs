@@ -21,55 +21,12 @@ public partial class AmmoInitSystem : SystemBase
 
         localTransformLU.Update(this);
 
-        Entities.WithName("AmmoInit")
+        Entities.WithName("AmmoInitWith")
            .WithAll<AmmoInit>()
            .ForEach((
                Entity e,
-               ref LocalTransform localTransform, in AmmoData ammoData) =>
-           {
-               if (ammoData.Patterns != null && ammoData.Patterns.Length >= 0)
-               {
-                   // GetNextAction();
-                   switch (ammoData.Patterns[ammoData.CurrentIndex])
-                   {
-                       case TransformAction action:
-                           ammoData.CurrentTransformAction = action;
-                           ammoData.CurrentActionType = ActionTypes.TransformAction;
-                           break;
-                       case DelayAction action:
-                           ammoData.CurrentDelayAction = action;
-                           ammoData.CurrentActionType = ActionTypes.DelayAction;
-                           break;
-                       case TransformWithEntitiesAction action:
-                           ammoData.CurrentTransformWithEntitiesAction = action;
-                           ammoData.CurrentActionType = ActionTypes.TransformWithEntities;
-                           break;
-                   }
-
-                   // ReadyAction();
-                   switch (ammoData.CurrentActionType)
-                   {
-                       case ActionTypes.TransformAction:
-                           ammoData.CurrentTransformAction.ReadyAction(localTransform);
-                           break;
-                       case ActionTypes.DelayAction:
-                           ammoData.CurrentDelayAction.ReadyAction();
-                           return;
-                       case ActionTypes.TransformWithEntities:
-                           ammoData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, new LocalTransform[] { });
-                           break;
-                   }
-
-                   ecb.RemoveComponent<AmmoInit>(e);
-               }
-           })
-           .WithoutBurst().Run();
-
-        Entities.WithName("AmmoInitWithHoming")
-           .WithAll<AmmoInit>()
-           .ForEach((
-               Entity e,
-               ref LocalTransform localTransform, in AmmoData ammoData, in GunHomingData homingData) =>
+               ref LocalTransform localTransform, in AmmoData ammoData, 
+               in HomingData homingData, in DelayData delayData) =>
            {
                LocalTransform homingTransform = default;
                if (localTransformLU.HasComponent(homingData.HomingEntity))
@@ -107,7 +64,7 @@ public partial class AmmoInitSystem : SystemBase
                        break;
                    case ActionTypes.DelayAction:
                        ammoData.CurrentDelayAction.ReadyAction();
-                       return;
+                       break;
                    case ActionTypes.TransformWithEntities:
                        ammoData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, new LocalTransform[] { homingTransform , gunTransform });
                        break;

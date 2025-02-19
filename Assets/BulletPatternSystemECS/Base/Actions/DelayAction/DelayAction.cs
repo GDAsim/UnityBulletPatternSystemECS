@@ -6,8 +6,7 @@ using UnityEngine;
 /// </summary>
 public struct DelayAction : IAction
 {
-    public Func<bool> DelayUntil;
-
+    public bool UseDelayUntil;
     public float Duration;
 
     #region Interface
@@ -21,18 +20,17 @@ public struct DelayAction : IAction
         
     }
 
-    public void DoAction()
+    public void DoAction(bool DelayUntil)
     {
-        if (DelayUntil != null)
+        if (!UseDelayUntil) return;
+
+        if (DelayUntil)
         {
-            if (DelayUntil() == true)
-            {
-                Duration = 0;
-            }
-            else
-            {
-                Duration = Mathf.Infinity;
-            }
+            Duration = 0;
+        }
+        else
+        {
+            Duration = Mathf.Infinity;
         }
     }
 
