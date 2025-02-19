@@ -24,7 +24,8 @@ public partial class AmmoSystem : SystemBase
 
         Entities.WithName("AmmoUpdate")
             .ForEach((
-                ref LocalTransform localTransform, in AmmoData ammoData, 
+                Entity e,
+                ref LocalTransform localTransform, in AmmoData ammoData,
                 in HomingData homingData, in DelayData delayData) =>
             {
                 if (ammoData.Patterns == null || ammoData.Patterns.Length == 0)
@@ -61,6 +62,10 @@ public partial class AmmoSystem : SystemBase
                         ammoData.CurrentTransformWithEntitiesAction.DoAction(DeltaTime, ref localTransform, new LocalTransform[] { homingTransform, gunTransform });
                         DoAction = ammoData.CurrentActionTimer >= ammoData.CurrentTransformWithEntitiesAction.Duration;
                         break;
+                    case ActionTypes.SplitAction:
+                        ammoData.CurrentSplitAction.DoAction(ref localTransform, ref ecb);
+                        DoAction = true;
+                        break;
                     default:
                         throw new System.Exception("Not Implemented");
                 }
@@ -79,6 +84,9 @@ public partial class AmmoSystem : SystemBase
                         case ActionTypes.TransformWithEntities:
                             ammoData.CurrentTransformWithEntitiesAction.EndAction(ref localTransform, new LocalTransform[] { homingTransform, gunTransform });
                             break;
+                        case ActionTypes.SplitAction:
+                            ammoData.CurrentSplitAction.EndAction(ref ecb);
+                            break;
                     }
 
                     // GetNextAction();
@@ -96,6 +104,10 @@ public partial class AmmoSystem : SystemBase
                             ammoData.CurrentTransformWithEntitiesAction = action;
                             ammoData.CurrentActionType = ActionTypes.TransformWithEntities;
                             break;
+                        case SplitAction action:
+                            ammoData.CurrentSplitAction = action;
+                            ammoData.CurrentActionType = ActionTypes.SplitAction;
+                            break;
                     }
 
                     if (++ammoData.CurrentIndex == ammoData.Patterns.Length) ammoData.CurrentIndex = 0;
@@ -110,8 +122,11 @@ public partial class AmmoSystem : SystemBase
                             ammoData.CurrentDelayAction.ReadyAction();
                             return;
                         case ActionTypes.TransformWithEntities:
-                            ammoData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, new LocalTransform[] { homingTransform , gunTransform });
+                            ammoData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, new LocalTransform[] { homingTransform, gunTransform });
                             break;
+                        case ActionTypes.SplitAction:
+                            ammoData.CurrentSplitAction.ReadyAction(e, ammoData);
+                            return;
                     }
 
                     ammoData.CurrentActionTimer = 0;

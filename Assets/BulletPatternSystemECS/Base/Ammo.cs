@@ -14,6 +14,7 @@ public class AmmoData : IComponentData
     public TransformAction CurrentTransformAction;
     public TransformWithEntitiesAction CurrentTransformWithEntitiesAction;
     public DelayAction CurrentDelayAction;
+    public SplitAction CurrentSplitAction;
 
     public float CurrentActionTimer;
 }

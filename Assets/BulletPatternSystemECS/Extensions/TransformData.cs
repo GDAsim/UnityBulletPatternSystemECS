@@ -26,9 +26,10 @@ public struct TransformData
         transform.Rotation = math.mul(transform.Rotation, Rotation);
         transform.Scale += Scale;
     }
-
-
-
+    public LocalTransform ToLocalTransform()
+    {
+        return LocalTransform.FromPositionRotationScale(Position, Rotation, Scale);
+    }
 
 
     public static TransformData operator -(TransformData left, TransformData right)

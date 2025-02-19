@@ -25,7 +25,7 @@ public partial class AmmoInitSystem : SystemBase
            .WithAll<AmmoInit>()
            .ForEach((
                Entity e,
-               ref LocalTransform localTransform, in AmmoData ammoData, 
+               ref LocalTransform localTransform, in AmmoData ammoData,
                in HomingData homingData, in DelayData delayData) =>
            {
                LocalTransform homingTransform = default;
@@ -54,6 +54,10 @@ public partial class AmmoInitSystem : SystemBase
                        ammoData.CurrentTransformWithEntitiesAction = action;
                        ammoData.CurrentActionType = ActionTypes.TransformWithEntities;
                        break;
+                   case SplitAction action:
+                       ammoData.CurrentSplitAction = action;
+                       ammoData.CurrentActionType = ActionTypes.SplitAction;
+                       break;
                }
 
                // ReadyAction();
@@ -66,8 +70,11 @@ public partial class AmmoInitSystem : SystemBase
                        ammoData.CurrentDelayAction.ReadyAction();
                        break;
                    case ActionTypes.TransformWithEntities:
-                       ammoData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, new LocalTransform[] { homingTransform , gunTransform });
+                       ammoData.CurrentTransformWithEntitiesAction.ReadyAction(localTransform, new LocalTransform[] { homingTransform, gunTransform });
                        break;
+                   case ActionTypes.SplitAction:
+                       ammoData.CurrentSplitAction.ReadyAction(e, ammoData);
+                       return;
                }
 
                ecb.RemoveComponent<AmmoInit>(e);
