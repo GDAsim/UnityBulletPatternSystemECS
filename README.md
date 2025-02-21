@@ -10,7 +10,7 @@ Implementation Milestones:
 - [X] Gun Preshoot Action
 - [X] Bullet Sync Move (Delay Action)
 - [X] Teleport Bullet Movement (Instant Action, Delta Movement Action)
-- [ ] Bullet Spawn Bullets (Split Action)
+- [X] Bullet Spawn Bullets (Split Action)
 
 
 ---
